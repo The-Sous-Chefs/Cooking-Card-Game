@@ -1,4 +1,4 @@
-# Unnamed, But Brilliant, Cooking Card Game
+# Un-Named--But Brilliant--Cooking Card Game
 
 ## Description
 
@@ -13,3 +13,10 @@ Since 3D game development can include a lot of large binary files, this repo is 
 git lfs knows which files to track differently based on the `.gitattributes` file in the top-most folder of this repo. If we ever find that we need to have git lfs track other files, the command `git lfs track "*.[filetype]"` will have git lfs track all `.[filetype]` files. The `.gitattributes` file in this repo was copied from another Unity 3D project, however, so if we discover that some weird behaviors are going on, the documentation for the `.gitattributes` file can be found [here](https://git-scm.com/docs/gitattributes)!
 
 One more thing: The `.gitignore` in this repo was also copied from another Unity 3D project, so it may need some work as well!
+
+## Branches
+
+1. **main** - The main branch of the repo (a.k.a.: master), GitHub calls it main now.
+2. **cardsystem** - The branch for developing the card parser and rules engine.
+3. **overworld** - The branch for developing the overworld generation library and experimenting with world generation.
+4. **artimport** - The branch for experimenting with creating art assets, importing them, and generally creating a pipeline.
