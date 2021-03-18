@@ -10,7 +10,7 @@ Name9,3,Immediate ,,,,10,,,,,,,,Recover 10 HP.
 Name10,3,Immediate ,,,5,,,,,,,,,Deal 5 damage to all enemies.
 Second Wind,5,Continuous,3,,,3,1,,,,,,,"For 3 turns, recover 3 HP and with draw 1 extra card."
 Ultimate Technique,10,Continuous,4,,4,4,,,,,,,,"For 4 turns, deal 4 damage to all enemies and recover 4 HP."
- Name13,5,Continuous,2,,,,,,,,X,,,"For 2 turns, stun an enemy, preventing it from moving."
+Name13,5,Continuous,2,,,,,,,,X,,,"For 2 turns, stun an enemy, preventing it from moving."
 Stone Resolve,10,Continuous,3,,,5,,,,0.4,,,,"For 3 turns, block 40% of incoming damage and recover 5 HP."
 Name15,3,Delayed,2,12,,,,,,,,,,"After 2 turns, deal 12 damage to an enemy."
 Timebomb,3,Delayed,3,,7,,,,,,,,,"After 3 turns, deal 7 damage to all enemies."
@@ -29,24 +29,20 @@ Name27,2,Continuous,5,,1,,,,,,,,,"For 5 turns, deal 1 damage to all enemies."
 Name28,3,Continuous,2,,,,1,,,,,,,"For 2 turns, draw 1 extra card."
 Name29,3,Immediate,,,,,3,3,,,,,,Discard up to 3 cards and draw 3 cards.
 Name30,4,Immediate,,10,,,,10,,,,,,Discard your hand. Deal 10 damage to all enemies.
-,6,Delayed ,2,,,,,,,,,3,,"After 2 turns, randomly generate x cards regardless rarity "
+,6,Delayed ,2,,,,,,,,,3,X,"After 2 turns, randomly generate x cards regardless rarity "
 ,3,Immediate ,,,,,3,3,,,,,X,Discard up to 3 cards and withdraw up to 3 cards
 ,4,Immediate ,,,,,,,,,,10,X,"Discard all the hands, deal x to all the enemies"
 Fire ball,4,Immediate,,,,,,,,,,,X,"Deal x damage to one enemy, generate one Ember"
 Embers ,,Continuous,,,,,,,,,,,X,Deal y damage for next 2 turn
 ,6,Immediate ,,,,,,,,,,,X,Deal the damage one enemy has been hurt this turn
 ,7,Immediate ,,,,,,,,,,,X,Lure an enemy to block damage for you for the next incoming damage
-,5,Continuous,3,,,,,,,,,1,X,"For 3 turns, can spell basic ability twice in a turn.
-Strengthen the basic value by +x"
+,5,Continuous,3,,,,,,,,,1,X,"For 3 turns, can spell basic ability twice in a turn. Strengthen the basic value by +x"
 ,15,Continuous,2,,,,,,,,,,X,"For 2 turns, revive if you die, discard half of the hands, recover 30% HP"
 ,8,Continuous,3,,,,,,,,,,X,"For 3 turns, if you killed an enemy, recover half of maximum hp "
-The Hourglass,6,Continuous,2,,,,,,,,,,X,"For 2 turns, stop all the movement (including you), but can be hurt 
-or healed (through some continous effects)"
-,12,Delayed,8,,,,,,,,,,X,"After 8 turns, recover your health back to the current value (HP after 
-8 turns doesn't matter as long the players are alive)"
+The Hourglass,6,Continuous,2,,,,,,,,,,X,"For 2 turns, stop all the movement (including you), but can be hurt or healed (through some continous effects)"
+,12,Delayed,8,,,,,,,,,,X,"After 8 turns, recover your health back to the current value (HP after 8 turns doesn't matter as long the players are alive)"
 Revenge,8,Delayed,3,,,,,,,,,,X,"After 3 turns, deal the hp you lose during these 3 turns to one enemy"
-Amplifier,4,Immediate ,,,,,,,,,,1,X,"For this turn, increase the value in description of all cards by x     
-(This card can also be amplfied if you have multiple copies)"
+Amplifier,4,Immediate ,,,,,,,,,,1,X,"For this turn, increase the value in description of all cards by x (This card can also be amplfied if you have multiple copies)"
 Recycle,6,Delayed,,,,,,,,,,,X,"Discard all the hands, after this turn, regenerate all the hands you played to your hand (not discarded)"
 Reset,4,Immediate,,,,,,,,,,,X,Remove all the buff/debuff(including continuous effects) from one character 
 Rising Storm,7,Immediate,,,,,,,,,,,X,Deal damage equal to 2 * the number of cards you've played this turn (including this one)
