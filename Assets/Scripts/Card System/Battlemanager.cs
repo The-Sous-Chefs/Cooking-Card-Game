@@ -1,40 +1,66 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
+using System;
+using UnityEngine.UI;
 
-public class CardParser : MonoBehaviour
+public class Battlemanager : MonoBehaviour
 {
+    public int cardID;
+    Card currentCard;
     public List<Card> cardsInGame = null;
-    
+
     void Awake()
     {
-        
         cardsInGame = new List<Card>();
-
+ 
         TextAsset cardsCSV = Resources.Load<TextAsset>("Cards");
         List<string> lines = new List<string>(cardsCSV.text.Split('\n'));
-        for(int i = 1; i < lines.Count; i++)
+        for (int i = 1; i < lines.Count; i++)
         {
             List<string> lineFields = ParseLine(lines[i]);
             Debug.Assert(
                     lineFields.Count == Constants.CARD_DESCRIPTION + 1,
                     "Line " + (i + 1) + " didn't have all the fields."
             );
-            if(lineFields[Constants.IGNORE_CARD].Length == 0)
+            if (lineFields[Constants.IGNORE_CARD].Length == 0)
             {
                 // this method will add the card to cardsInGame to save a copy
                 CreateCardFromLine(lineFields);
             }
         }
 
-        foreach(Card card in cardsInGame)
+        foreach (Card card in cardsInGame)
         {
             Debug.Log(card);
         }
-       
     }
+
+    void Start()
+    {
+        currentCard = cardsInGame[cardID];
+        Debug.Log("card " + currentCard.name + " loaded.");
+    }
+
+    public void scancard ()
+    {
+        //Debug.Log(demoMonster.name);
+        singleDamageHandler();
+    }
+
+    // 330 demo only: currently just defaultly take effect to the one enemy
+    // Need to implement target later
+    private bool singleDamageHandler()
+    {
+        if (currentCard.singleDamage > 0)
+        {
+            GetComponent<Enemy>().demoMonster.hpDecrease(currentCard.singleDamage);
+            return true;
+        }
+        return false;
+    }
+
 
     private List<string> ParseLine(string line)
     {
@@ -43,15 +69,15 @@ public class CardParser : MonoBehaviour
         returnMe.Add("");
         int currIndex = 0;
         bool betweenQuotes = false;
-        foreach(char currChar in line)
+        foreach (char currChar in line)
         {
-            if(currChar == '"')
+            if (currChar == '"')
             {
                 betweenQuotes = !betweenQuotes;
             }
-            else if(currChar == ',')
+            else if (currChar == ',')
             {
-                if(!betweenQuotes)
+                if (!betweenQuotes)
                 {
                     returnMe.Add("");
                     currIndex++;
