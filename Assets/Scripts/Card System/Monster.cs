@@ -6,11 +6,11 @@ public struct Monster{
     public string name;
     public int level;
     public int initialHp;
+    public int currentHp;
     public int basicAtt;
     public bool stuns;
-    public int currentHp;
 
-    public Monster(string name,int level,int initialHp,int basicAtt,bool stuns)
+    public Monster(string name, int level, int initialHp, int basicAtt, bool stuns)
     {
         this.name = name;
         this.level = level;
