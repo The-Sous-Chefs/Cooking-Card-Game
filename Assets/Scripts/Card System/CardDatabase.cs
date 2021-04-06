@@ -4,13 +4,45 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-public class CardParser : MonoBehaviour
+public class CardDatabase
 {
-    public List<Card> cardsInGame = null;
-    
-    void Awake()
+    //-----------------
+    // static variables
+    //-----------------
+
+    // this essentially allows any script to access CardDatabase.Instance and be
+    // able to get the exact same object, since it will either construct the
+    // original instance or return the existing one
+    private static CardDatabase instance;
+    public static CardDatabase Instance
     {
-        
+        get
+        {
+            if(CardDatabase.instance == null)
+            {
+                Debug.Log("Instancing the card database.");
+                CardDatabase.instance = new CardDatabase();
+            }
+            else
+            {
+                Debug.Log("Using the existing card database");
+            }
+            return CardDatabase.instance;
+        }
+    }
+
+    //-----------------
+    // member variables
+    //-----------------
+
+    private List<Card> cardsInGame = null;
+
+    //--------
+    // methods
+    //--------
+
+    CardDatabase()
+    {
         cardsInGame = new List<Card>();
 
         TextAsset cardsCSV = Resources.Load<TextAsset>("Cards");
@@ -33,7 +65,6 @@ public class CardParser : MonoBehaviour
         {
             Debug.Log(card);
         }
-       
     }
 
     private List<string> ParseLine(string line)
@@ -140,4 +171,14 @@ public class CardParser : MonoBehaviour
                 stuns
         ));
     }
+
+    public Card GetCardByID(int id)
+    {
+        Debug.Assert(id >= 0);
+        Debug.Assert(id < cardsInGame.Count);
+        return cardsInGame[id];
+    }
+
+    // we may want methods here to return random cards, when the player is
+    // adding cards to their deck
 }

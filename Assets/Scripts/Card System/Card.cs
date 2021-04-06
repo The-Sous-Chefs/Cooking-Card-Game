@@ -71,7 +71,7 @@ public struct Card
     {
         this.name = name;
         this.cost = cost;
-       
+
         switch(cardType)
         {
             case "Immediate":
