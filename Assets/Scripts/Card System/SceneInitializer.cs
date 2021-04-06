@@ -6,10 +6,14 @@ using UnityEngine;
  * This class can be used to initialize scenes with whatever they need to be
  * initialized. This class just instances any singletons, but if a scene needs
  * more particular behavior, it can have a child class implemented.
+ *
+ * Actually, this class may not be needed at all, because the things that need
+ * the singletons will just instance them by virtue of using them.
  */
 public class SceneInitializer : MonoBehaviour
 {
     protected CardDatabase cardDB;
+    protected PlayerStats playerStats;
 
     protected void Awake()
     {
@@ -19,5 +23,6 @@ public class SceneInitializer : MonoBehaviour
 
         // simply accessing CardDatabase.Instance will make sure it exists
         cardDB = CardDatabase.Instance;
+        playerStats = PlayerStats.Instance;
     }
 }

@@ -19,4 +19,8 @@ public static class Constants
     public static int STUNS = 11;
     public static int CARD_DESCRIPTION = 14;
     public static int IGNORE_CARD = 13;
+
+    // player stats related constants
+    public static int MAX_HEALTH = 100;
+    public static int MAX_GLOBAL_MANA = 100;
 }
