@@ -26,11 +26,7 @@ public class Battlemanager : MonoBehaviour
         Debug.Log("Scanning " + currentCard.name);
         singleDamageHandler(targetEnemy);
         healHandler();
-
-
-
-
-
+        blockHandler();
         costHandler();
        
     }
@@ -61,16 +57,23 @@ public class Battlemanager : MonoBehaviour
         {
             enemypatternIndex = 0;
         }
+        curChef.buffupdate();
+        
     }
 
     private void enemyAttack()
     {
-        curChef.hpDecrease(targetEnemy.demoMonster.basicAtt);
+         Debug.Log("og damgade:"+targetEnemy.demoMonster.basicAtt );
+        int damagedealed = targetEnemy.demoMonster.basicAtt * (100 - curChef.buff[1,0])/100;
+         Debug.Log("percentage:"+ curChef.buff[1,0] );
+        PlayerStats.Instance.ApplyDamage(damagedealed);
     }
 
     private void enemySpellSkill()
     {
-        Debug.Log(targetEnemy.demoMonster.name + " spelled its skill.");
+        // turns plus 1 because the counter will decrease once enemy finish its move
+        curChef.getStunned(targetEnemy.demoMonster.skilleffect +1);
+        Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
     }
 
     void Update()
@@ -110,7 +113,7 @@ public class Battlemanager : MonoBehaviour
         if (currentCard.heal > 0)
         {
             Debug.Log("Healing the chef by " + currentCard.heal);
-            curChef.hpIncrease(currentCard.heal);
+            PlayerStats.Instance.ApplyHealing(currentCard.heal);
             return true;
         }
         return false;
@@ -121,8 +124,23 @@ public class Battlemanager : MonoBehaviour
         if (currentCard.cost > 0)
         {
             Debug.Log("Cost " + currentCard.cost + " GM");
-            curChef.gmDec(currentCard.cost);
+            PlayerStats.Instance.TrySpendMana(currentCard.cost);
             return true;
+        }
+        return false;
+    }
+
+    private bool blockHandler() {
+        if(currentCard.blockPercent >0) {
+            if (currentCard.cardType == CardType.IMMEDIATE ) {
+                Debug.Log("current turn, Blocking vlaue =  " + currentCard.blockPercent);
+                curChef.blocking((int)(currentCard.blockPercent* 100),1);
+                return true;
+            } else {
+                Debug.Log( currentCard.turnsInPlay + "turn, Blocking vlaue =  " + currentCard.blockPercent);
+                curChef.blocking((int)(currentCard.blockPercent* 100),currentCard.turnsInPlay);
+                return true;
+            }
         }
         return false;
     }

@@ -8,19 +8,20 @@ public struct Monster{
     public int initialHp;
     public int currentHp;
     public int basicAtt;
-    public bool stuns;
+    public int skilleffect;
     public int[] actionpattern;
 
-    public Monster(string name, int level, int initialHp, int basicAtt, bool stuns)
+    public Monster(string name, int level, int initialHp, int basicAtt, int skilleffect, int[] action)
     {
+  
         this.name = name;
         this.level = level;
         this.initialHp = initialHp;
         this.basicAtt = basicAtt;
-        this.stuns = stuns;
+        this.skilleffect = skilleffect;;
         this.currentHp = initialHp;
         //default action pattern, 1 means attack, 2 means skill, 0 means rest
-        this.actionpattern = new int[4] { 1, 1, 1 ,2 };
+        this.actionpattern = action;
     }
 
     public void hpDecrease(int value)

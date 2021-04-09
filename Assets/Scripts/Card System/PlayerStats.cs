@@ -20,7 +20,7 @@ public class PlayerStats
             }
             else
             {
-                Debug.Log("Using the existing player stats singleton.");
+            //    Debug.Log("Using the existing player stats singleton.");
             }
             return PlayerStats.instance;
         }
