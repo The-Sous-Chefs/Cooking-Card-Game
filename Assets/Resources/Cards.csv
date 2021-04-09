@@ -16,7 +16,7 @@ Name15,3,Delayed,2,12,,,,,,,,,,"After 2 turns, deal 12 damage to an enemy."
 Timebomb,3,Delayed,3,,7,,,,,,,,,"After 3 turns, deal 7 damage to all enemies."
 Name17,5,Immediate,,,,,2,,,,,,,Draw 2 cards.
 Name18,8,Immediate,,,,,3,,,,,,,Draw 3 cards.
-Name19,0,Immediate,,,,,,10,20,,,,,Discard your hand. Regenerate 20 global mana.
+Name19,0,Immediate,,,,,,6,20,,,,,Discard 6 cards. Regenerate 20 global mana.
 Name20,4,Immediate,,14,,,,,,,,,,Deal 14 damage to an enemy.
 Name21,3,Immediate,,6,,,1,,,,,,,"Deal 6 damage to an enemy, draw a card."
 The Long Con,1,Delayed,5,,,,3,,,,,,,"After 5 turns, draw 3 cards."

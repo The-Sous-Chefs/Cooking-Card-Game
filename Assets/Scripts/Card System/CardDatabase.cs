@@ -50,10 +50,10 @@ public class CardDatabase
         for(int i = 1; i < lines.Count; i++)
         {
             List<string> lineFields = ParseLine(lines[i]);
-            Debug.Assert(
-                    lineFields.Count == Constants.CARD_DESCRIPTION + 1,
-                    "Line " + (i + 1) + " didn't have all the fields."
-            );
+            // Debug.Assert(
+            //         lineFields.Count == Constants.CARD_DESCRIPTION + 1,
+            //         "Line " + (i + 1) + " didn't have all the fields."
+            // );
             if(lineFields[Constants.IGNORE_CARD].Length == 0)
             {
                 // this method will add the card to cardsInGame to save a copy

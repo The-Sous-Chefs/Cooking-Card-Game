@@ -12,23 +12,46 @@ public class Battlemanager : MonoBehaviour
     [SerializeField] private Tempchef curChef;
     private Card currentCard;
     private int enemypatternIndex;
+    private int cardindex;
     public Text cardid;
     public Text cardtx;
+    public Text handstx;
+    public int beginninghandsNum;
+    public List<int> hands;
 
     void Start()
     {
+        handsInitialize();
+        cardID = hands[0];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
         Debug.Log("Card " + currentCard.name + " loaded.");
     }
 
-    public void scancard()
+    private void handsInitialize() {
+        hands = new List<int>();
+        for (int i = 0; i <beginninghandsNum; i++) {
+            //randomly draw cards
+            hands.Add(UnityEngine.Random.Range(0, 30));      
+        }
+    }
+
+    public void playthiscard()
     {
         Debug.Log("Scanning " + currentCard.name);
-        singleDamageHandler(targetEnemy);
-        healHandler();
-        blockHandler();
-        costHandler();
-       
+        //only if remaining mana is affordable
+        if (costHandler()) {
+            singleDamageHandler(targetEnemy);
+            healHandler();
+            blockHandler();
+            aoeDamageHandler();
+            drawHandler();
+            discardHandler();
+            hands.RemoveAt(cardindex);
+            // need to do range things, will fix later
+            cardindex = 0;
+        } else {
+             Debug.Log("Not enough GM.");
+        }
     }
 
     public void enemyturn()
@@ -76,21 +99,41 @@ public class Battlemanager : MonoBehaviour
         Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
     }
 
+    string numListToString(List<int> list){
+        string str="Current hands: [";
+        foreach(int n in list) 
+            str+=n+" ,";
+            
+        str += "]";
+        return str;
+    }
+
     void Update()
     {
-        cardid.text = "Card ID: " + cardID;
+        cardID = hands[cardindex];
+        currentCard = CardDatabase.Instance.GetCardByID(cardID);
+        cardid.text = "Card ID: " + cardID + ", Cost: " + currentCard.cost ;
         cardtx.text = currentCard.cardText;
+        handstx.text = numListToString(hands);
     }
 
     public void addCardNum()
     {
-        cardID++;
+        cardindex++;
+        if (cardindex == hands.Count) {
+            cardindex = 0;
+        }
+        cardID = hands[cardindex]; 
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
     }
 
     public void decCardNum()
     {
-        cardID--;
+        cardindex--;
+        if (cardindex == -1) {
+            cardindex = hands.Count - 1;
+        }
+        cardID = hands[cardindex]; 
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
     }
 
@@ -103,6 +146,17 @@ public class Battlemanager : MonoBehaviour
         {
             Debug.Log("Dealing " + currentCard.singleDamage + " damage to " + targetEnemy.enmName);
             targetEnemy.demoMonster.hpDecrease(currentCard.singleDamage);
+            return true;
+        }
+        return false;
+    }
+
+    private bool aoeDamageHandler() {
+        // placeholder before we have a multi-enemies battle system
+        if (currentCard.aoeDamage > 0)
+        {
+            Debug.Log("Dealing " + currentCard.aoeDamage + " damage to all");
+            targetEnemy.demoMonster.hpDecrease(currentCard.aoeDamage);
             return true;
         }
         return false;
@@ -121,13 +175,9 @@ public class Battlemanager : MonoBehaviour
 
     private bool costHandler()
     {
-        if (currentCard.cost > 0)
-        {
-            Debug.Log("Cost " + currentCard.cost + " GM");
-            PlayerStats.Instance.TrySpendMana(currentCard.cost);
-            return true;
-        }
-        return false;
+    
+        return PlayerStats.Instance.TrySpendMana(currentCard.cost);
+     
     }
 
     private bool blockHandler() {
@@ -144,4 +194,28 @@ public class Battlemanager : MonoBehaviour
         }
         return false;
     }
+
+    private bool drawHandler() {
+        if (currentCard.draw > 0) {
+            for (int i = 0; i <currentCard.draw; i++) {
+                hands.Add(UnityEngine.Random.Range(0, 30));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    //randomly discard some number of cards 
+    private bool discardHandler() {
+         if (currentCard.discard > 0) {
+            for (int i = 0; i <currentCard.discard; i++) {
+                if (hands.Count > 0) {
+                    hands.RemoveAt(UnityEngine.Random.Range(0, hands.Count));
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 }
