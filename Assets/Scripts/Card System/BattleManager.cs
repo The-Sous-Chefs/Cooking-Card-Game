@@ -16,9 +16,14 @@ public class BattleManager : MonoBehaviour
     private Card currentCard;
     private int enemyPatternIndex;
     private int cardIndex;
+
+    // TEMPORARY: Just for testing before UI is implemented
     public Text cardIDText;
     public Text cardBodyText;
     public Text handText;
+    public Text handListText;
+    public Text deckSizeText;
+    public Text discardPileSizeText;
 
     void Start()
     {
@@ -43,9 +48,18 @@ public class BattleManager : MonoBehaviour
     {
         cardID = hand[cardIndex];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
-        cardIDText.text = "Card ID: " + cardID + ", Cost: " + currentCard.cost;
+        cardIDText.text = "Card ID: " + cardID + ", Name: " + currentCard.name + ", Cost: " + currentCard.cost;
         cardBodyText.text = currentCard.cardText;
         handText.text = IntListToString(hand);
+
+        string handList = "";
+        foreach(int id in hand)
+        {
+            handList += CardDatabase.Instance.GetCardByID(id).ToString() + "\n\n";
+        }
+        handListText.text = handList;
+        deckSizeText.text = deck.Count.ToString();
+        discardPileSizeText.text = discardPile.Count.ToString();
     }
 
     private void ShuffleDeck()
@@ -271,10 +285,10 @@ public class BattleManager : MonoBehaviour
 
     string IntListToString(List<int> list)
     {
-        string str="Current hand: [";
+        string str="Current Hand: [";
         foreach(int n in list)
         {
-            str += n + " ,";
+            str += n + ", ";
         }
         str += "]";
         return str;
