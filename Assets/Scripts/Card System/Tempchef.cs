@@ -34,6 +34,8 @@ public class Tempchef : MonoBehaviour
         buff[1,1] = turns;
     }
 
+
+
     // to update as turns pass, once the remaining turns for one status become 0, set the value of that status to 0 to neutralize the buff.
     public void buffupdate()
     {

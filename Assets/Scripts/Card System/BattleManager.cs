@@ -64,8 +64,8 @@ public class BattleManager : MonoBehaviour
         {
             DrawCard();
         }
-        //debugging card
-        hand.Add(12);
+        // debugging card: put the card would like to test here
+        // hand.Add(0);
         cardID = hand[0];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
         Debug.Log("Card " + currentCard.name + " loaded.");
@@ -104,6 +104,13 @@ public class BattleManager : MonoBehaviour
     private void ShuffleDeck()
     {
         // shuffle with the Fisher-Yates algorithm
+        // Diyuan: This algo is so cool
+
+        // Removing the basic cards from our deck, it is kinda stupid but effective way
+        deck.Remove(1);
+        deck.Remove(2);
+        deck.Remove(3);
+
         int indexA = deck.Count;
         while(indexA > 1)
         {
@@ -210,10 +217,23 @@ public class BattleManager : MonoBehaviour
         HealHandler();
         BlockHandler();
         stunHandler();
+        ManaRegenHandler(); 
         // discard before drawing, in case of cards that say discard X, then
         // draw Y
         DiscardHandler();
         DrawHandler();
+    }
+
+
+    private bool ManaRegenHandler() 
+    {
+        if (currentCard.manaRegen > 0) 
+        {
+            Debug.Log("Regenerating  " + currentCard.manaRegen + " global mana ");
+            PlayerStats.Instance.AddGlobalMana(currentCard.manaRegen);
+            return true;
+        }
+        return false;
     }
 
     private bool TargettedDamageHandler(Enemy targetEnemy)
@@ -242,7 +262,7 @@ public class BattleManager : MonoBehaviour
     private bool stunHandler(){
         if(currentCard.stuns)
         {
-            Debug.Log("stun the enemy");
+            Debug.Log("Stunning the enemy");
             targetEnemy.demoMonster.getStunned();
             return true;
         }
@@ -296,8 +316,8 @@ public class BattleManager : MonoBehaviour
     // randomly discard some number of cards 
     private bool DiscardHandler()
     {
-         if(currentCard.discard > 0)
-         {
+        if(currentCard.discard > 0)
+        {
             for(int i = 0; i < currentCard.discard; i++)
             {
                 if(hand.Count > 0)
@@ -398,6 +418,26 @@ public class BattleManager : MonoBehaviour
         curChef.getStunned(targetEnemy.demoMonster.skilleffect +1);
         Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
     }
+
+    private void BasicAbility(int id){
+        Card temp = currentCard;
+        currentCard = CardDatabase.Instance.GetCardByID(id);
+        if(CanPlayCard()) {
+            ResolveCardEffects();
+        }
+        currentCard = temp;
+    }
+    public void BasicAttack() {
+        BasicAbility(1);
+    }
+
+    public void BasicBlock() {
+        BasicAbility(2);
+    }
+    public void BasicRecover() {
+        BasicAbility(3);
+    }
+
 
     public void IncrementCardNumber()
     {
