@@ -82,8 +82,8 @@ public class BattleManager : MonoBehaviour
     {
         int discardIndex = UnityEngine.Random.Range(0, hand.Count);
         int discardedCard = hand[discardIndex];
-        hand.RemoveAt();
-        discardedCard.Add(discardedCard);
+        hand.RemoveAt(discardIndex);
+        discardPile.Add(discardedCard);
     }
 
     public void PlayCard()
