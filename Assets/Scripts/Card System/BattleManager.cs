@@ -5,11 +5,37 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 
+public class DCCard
+{
+    //-----------------
+    // member variables
+    //-----------------
+
+    public int cardID          { get;}
+    public int cooldownCounter { get; private set; }
+
+    public DCCard(int cardID, int cooldownCounter)
+    {
+        Debug.Assert(cooldownCounter > 0);
+        this.cardID = cardID;
+        this.cooldownCounter = cooldownCounter;
+    }
+
+    public bool DecrementCounter()
+    {
+        cooldownCounter--;
+        return cooldownCounter == 0;
+    }
+}
+
 public class BattleManager : MonoBehaviour
 {
     public List<int> deck;
     public List<int> discardPile;
     public List<int> hand;
+    public List<DCCard> dccs;
+
+    // TEMPORARY: Just for testing before UI is implemented, should be removed
     [SerializeField] private int cardID;
     [SerializeField] private Enemy targetEnemy;
     [SerializeField] private Tempchef curChef;
@@ -17,21 +43,22 @@ public class BattleManager : MonoBehaviour
     private int enemyPatternIndex;
     private int cardIndex;
 
-    // TEMPORARY: Just for testing before UI is implemented
     public Text cardIDText;
     public Text cardBodyText;
     public Text handText;
     public Text handListText;
     public Text deckSizeText;
     public Text discardPileSizeText;
+    public Text dccsContentsText;
 
     void Start()
     {
-        // initialize the deck, discardPile, and hand
+        // initialize the deck, discardPile, hand, and DCCS
         deck = PlayerStats.Instance.GetCollectedCardIDs();
         ShuffleDeck();
         discardPile = new List<int>();
         hand = new List<int>();
+        dccs = new List<DCCard>();
 
         // draw the player's opening hand
         for(int i = 0; i < Constants.STARTING_HAND_SIZE; i++)
@@ -60,6 +87,14 @@ public class BattleManager : MonoBehaviour
         handListText.text = handList;
         deckSizeText.text = deck.Count.ToString();
         discardPileSizeText.text = discardPile.Count.ToString();
+
+        string dccsList = "";
+        foreach(DCCard card in dccs)
+        {
+            dccsList += CardDatabase.Instance.GetCardByID(card.cardID).ToString() +
+                    "\nThe Above Card's Cooldown is: " + card.cooldownCounter + "\n\n";
+        }
+        dccsContentsText.text = dccsList;
     }
 
     private void ShuffleDeck()
@@ -86,10 +121,15 @@ public class BattleManager : MonoBehaviour
             discardPile = new List<int>();
         }
 
-        int lastIndex = deck.Count - 1;
-        int topCard = deck[lastIndex];
-        deck.RemoveAt(lastIndex);
-        hand.Add(topCard);
+        if(deck.Count != 0)
+        {
+            // if the discard pile was empty, it's still possible that the deck
+            // is empty at this point, so the if statement is needed
+            int lastIndex = deck.Count - 1;
+            int topCard = deck[lastIndex];
+            deck.RemoveAt(lastIndex);
+            hand.Add(topCard);
+        }
     }
 
     private void DiscardCardAtRandom()
@@ -100,32 +140,75 @@ public class BattleManager : MonoBehaviour
         discardPile.Add(discardedCard);
     }
 
-    public void PlayCard()
+    private bool CanPlayCard()
     {
-        Debug.Log("Scanning " + currentCard.name);
-        // only if remaining mana is affordable
-        if(CanPayCost()) {
-            TargettedDamageHandler(targetEnemy);
-            AOEDamageHandler();
-            HealHandler();
-            BlockHandler();
-            // discard before drawing, in case of cards that say discard X, then
-            // draw Y
-            DiscardHandler();
-            DrawHandler();
-            int playedCard = hand[cardIndex];
-            hand.RemoveAt(cardIndex);
-            discardPile.Add(playedCard);
-            // need to do range things, will fix later
-            cardIndex = 0;
-        } else {
-             Debug.Log("Not enough GM.");
+        bool isDCCard =
+                currentCard.cardType == CardType.DELAYED ||
+                currentCard.cardType == CardType.CONTINUOUS;
+        if((isDCCard && (dccs.Count < 5)) || !isDCCard)
+        {
+            // have to be sure to only call TrySpendMana() if the Delayed or
+            // Continuous card actually has a space in the DCCS, since the
+            // method has a side effect of spending the mana
+            return PlayerStats.Instance.TrySpendMana(currentCard.cost);
+        }
+        else
+        {
+            // this block will only be entered if the card was Delayed or
+            // Continuous, but there wasn't space for it in the DCCS
+            return false;
         }
     }
 
-    private bool CanPayCost()
+    public void PlayCard()
     {
-        return PlayerStats.Instance.TrySpendMana(currentCard.cost);
+        Debug.Log("Scanning " + currentCard.name);
+        // only if remaining mana is affordable and space exists for Delayed or
+        // Continuous cards
+        if(CanPlayCard())
+        {
+            int playedCard = hand[cardIndex];
+            hand.RemoveAt(cardIndex);
+
+            switch(currentCard.cardType)
+            {
+                case CardType.IMMEDIATE:
+                    ResolveCardEffects();
+                    discardPile.Add(playedCard);
+                    break;
+                
+                case CardType.DELAYED:
+                case CardType.CONTINUOUS:
+                    // same behavior for both card types
+                    Debug.Assert(dccs.Count < Constants.DCCS_SIZE);
+                    dccs.Add(new DCCard(playedCard, currentCard.turnsInPlay));
+                    break;
+                
+                case CardType.BASIC:
+                default:
+                    Debug.Assert(false, "Unknown card type trying to be played!");
+                    break;
+            }
+
+            // need to do range things, will fix later
+            cardIndex = 0;
+        }
+        else
+        {
+            Debug.Log("Couldn't play the card for some reason.");
+        }
+    }
+
+    public void ResolveCardEffects()
+    {
+        TargettedDamageHandler(targetEnemy);
+        AOEDamageHandler();
+        HealHandler();
+        BlockHandler();
+        // discard before drawing, in case of cards that say discard X, then
+        // draw Y
+        DiscardHandler();
+        DrawHandler();
     }
 
     private bool TargettedDamageHandler(Enemy targetEnemy)
@@ -214,6 +297,38 @@ public class BattleManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        // handle cards in the DCCS
+        List<int> cardsToRemove = new List<int>();
+        for(int i = 0; i < dccs.Count; i++)
+        {
+            bool cooldownOver = dccs[i].DecrementCounter();
+            currentCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
+            if(currentCard.cardType == CardType.DELAYED)
+            {
+                if(cooldownOver)
+                {
+                    ResolveCardEffects();
+                }
+            }
+            else if(currentCard.cardType == CardType.CONTINUOUS)
+            {
+                ResolveCardEffects();
+            }
+
+            if(cooldownOver)
+            {
+                cardsToRemove.Add(i);
+            }
+        }
+        // iterate backwards across cardsToRemove, so the indices can be
+        // guaranteed to be correct
+        for(int i = cardsToRemove.Count - 1; i >= 0; i--)
+        {
+            int removedCard = dccs[cardsToRemove[i]].cardID;
+            dccs.RemoveAt(cardsToRemove[i]);
+            discardPile.Add(removedCard);
+        }
+
         // the player draws a card every turn (except, technically, the first,
         // since nothing will call StartPlayerTurn() at that point)
         DrawCard();

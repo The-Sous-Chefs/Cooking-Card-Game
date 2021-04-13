@@ -39,7 +39,7 @@ public struct Card
     public CardType cardType    { get; }
     public string cardText      { get; }
 
-    // values that drive functionality, provided by a List<int>--in this order
+    // values that drive functionality
     public int turnsInPlay      { get; }
     public int singleDamage     { get; }
     public int aoeDamage        { get; }
