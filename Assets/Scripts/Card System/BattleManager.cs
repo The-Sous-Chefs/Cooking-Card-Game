@@ -51,6 +51,9 @@ public class BattleManager : MonoBehaviour
     public Text discardPileSizeText;
     public Text dccsContentsText;
     public Image monsterSwitcherImage;
+    public GameObject winMessage;
+    public GameObject loseMessage;
+
     void Start()
     {
         // initialize the deck, discardPile, hand, and DCCS
@@ -74,9 +77,12 @@ public class BattleManager : MonoBehaviour
 
     void Update()
     {
-        if (hand.Count != 0) {
+        if (hand.Count != 0)
+        {
             cardID = hand[cardIndex];
-        } else {
+        }
+        else
+        {
             cardID = 0;
         }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
@@ -106,11 +112,6 @@ public class BattleManager : MonoBehaviour
     {
         // shuffle with the Fisher-Yates algorithm
         // Diyuan: This algo is so cool
-
-        // Removing the basic cards from our deck, it is kinda stupid but effective way
-        deck.Remove(1);
-        deck.Remove(2);
-        deck.Remove(3);
 
         int indexA = deck.Count;
         while(indexA > 1)
@@ -217,14 +218,13 @@ public class BattleManager : MonoBehaviour
         AOEDamageHandler();
         HealHandler();
         BlockHandler();
-        stunHandler();
+        StunHandler();
         ManaRegenHandler(); 
         // discard before drawing, in case of cards that say discard X, then
         // draw Y
         DiscardHandler();
         DrawHandler();
     }
-
 
     private bool ManaRegenHandler() 
     {
@@ -243,6 +243,10 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Dealing " + currentCard.singleDamage + " damage to " + targetEnemy.enmName);
             targetEnemy.demoMonster.DecreaseHP(currentCard.singleDamage);
+            if(targetEnemy.demoMonster.currentHp <= 0)
+            {
+                PlayerWins();
+            }
             return true;
         }
         return false;
@@ -255,12 +259,17 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Dealing " + currentCard.aoeDamage + " damage to all");
             targetEnemy.demoMonster.DecreaseHP(currentCard.aoeDamage);
+            if(targetEnemy.demoMonster.currentHp <= 0)
+            {
+                PlayerWins();
+            }
             return true;
         }
         return false;
     }
 
-    private bool stunHandler(){
+    private bool StunHandler()
+    {
         if(currentCard.stuns)
         {
             Debug.Log("Stunning the enemy");
@@ -386,7 +395,8 @@ public class BattleManager : MonoBehaviour
         monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,255);
         Invoke("MakeTransparent", 1);
 
-        if (!targetEnemy.demoMonster.stunned) {
+        if (!targetEnemy.demoMonster.stunned)
+        {
             int curAction = targetEnemy.demoMonster.actionpattern[enemyPatternIndex];
             Debug.Log("Enemy turn start : " + curAction);
             switch(curAction)
@@ -420,6 +430,10 @@ public class BattleManager : MonoBehaviour
         int damagedealed = targetEnemy.demoMonster.basicAtt * (100 - curChef.buff[1,0])/100;
         Debug.Log("percentage:"+ curChef.buff[1,0] );
         PlayerStats.Instance.ApplyDamage(damagedealed);
+        if(PlayerStats.Instance.GetHealthAsPercentage() <= 0.0f)
+        {
+            PlayerLoses();
+        }
     }
 
     private void HandleEnemySpecialSkill()
@@ -429,25 +443,47 @@ public class BattleManager : MonoBehaviour
         Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
     }
 
-    private void BasicAbility(int id){
+    private void BasicAbility(int id)
+    {
         Card temp = currentCard;
         currentCard = CardDatabase.Instance.GetCardByID(id);
-        if(CanPlayCard()) {
+        if(CanPlayCard())
+        {
             ResolveCardEffects();
         }
         currentCard = temp;
     }
-    public void BasicAttack() {
+
+    private void PlayerWins()
+    {
+        winMessage.SetActive(true);
+    }
+
+    private void PlayerLoses()
+    {
+        loseMessage.SetActive(true);
+    }
+
+    // TEMPORARY: This method needs removing
+    public void RestartDemo()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    public void BasicAttack()
+    {
         BasicAbility(1);
     }
 
-    public void BasicBlock() {
+    public void BasicBlock()
+    {
         BasicAbility(2);
     }
-    public void BasicRecover() {
+
+    public void BasicRecover()
+    {
         BasicAbility(3);
     }
-
 
     public void IncrementCardNumber()
     {
@@ -457,9 +493,12 @@ public class BattleManager : MonoBehaviour
             cardIndex = 0;
         }
         // To get rid of OutOfRange
-        if(hand.Count != 0) {
+        if(hand.Count != 0)
+        {
             cardID = hand[cardIndex]; 
-        } else {
+        }
+        else
+        {
             cardID = 0;
         }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
@@ -473,9 +512,12 @@ public class BattleManager : MonoBehaviour
             cardIndex = hand.Count - 1;
         }
         // To get rid of OutOfRange
-        if(hand.Count != 0) {
+        if(hand.Count != 0)
+        {
             cardID = hand[cardIndex]; 
-        } else {
+        }
+        else
+        {
             cardID = 0;
         }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
@@ -483,7 +525,7 @@ public class BattleManager : MonoBehaviour
 
     string IntListToString(List<int> list)
     {
-        string str="Current Hand: [";
+        string str = "Current Hand: [";
         foreach(int n in list)
         {
             str += n + ", ";
