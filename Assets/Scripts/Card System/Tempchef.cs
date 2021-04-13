@@ -11,6 +11,7 @@ public class Tempchef : MonoBehaviour
     public Text gmtxt;
     public int[,] buff;
     public PlayerStats playerSta;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,14 +21,13 @@ public class Tempchef : MonoBehaviour
         buff = new int[2, 2] { { 0, 0 }, { 0, 0 } };
     }
 
-
     // easy to read since we don't have much status now
     public void getStunned(int turns)
     {
         buff[0,0] = 1;
         buff[0,1] = turns;
     }
-    
+
     public void blocking(int blockrate, int turns)
     {
         buff[1,0] = blockrate;
@@ -41,17 +41,22 @@ public class Tempchef : MonoBehaviour
         for (int i = 0; i < buff.GetLength(0);i++)
         {
             buff[i, 1] -= 1;
-            if (buff[i,1] <= 0) {
+            if (buff[i,1] <= 0)
+            {
                 buff[i, 1] = 0;
                 buff[i, 0] = 0;
             }
         }
     }
 
-    private void showStunned() {
-        if (buff[0,0] != 0) {
+    private void showStunned()
+    {
+        if (buff[0,0] != 0)
+        {
             chefmove.interactable = false;
-        } else {
+        }
+        else
+        {
             chefmove.interactable = true;
         }
     }

@@ -5,7 +5,6 @@ using System.Globalization;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
-
 {
     public Monster demoMonster = new Monster("demoMonster",1,50,3, 1, new int[4] { 1, 1, 1, 2 });
     public int enemyHp;

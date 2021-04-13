@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Monster{
+public struct Monster
+{
     public string name;
     public int level;
     public int initialHp;
@@ -13,7 +14,6 @@ public struct Monster{
 
     public Monster(string name, int level, int initialHp, int basicAtt, int skilleffect, int[] action)
     {
-  
         this.name = name;
         this.level = level;
         this.initialHp = initialHp;
@@ -24,12 +24,7 @@ public struct Monster{
         this.actionpattern = action;
     }
 
-    public void hpDecrease(int value)
-    {
-        this.currentHp -= value;
-    }
-
-    public void hpIncrease(int value)
+    public void IncreaseHP(int value)
     {
         this.currentHp += value;
         if(this.currentHp > this.initialHp)
@@ -37,5 +32,9 @@ public struct Monster{
             this.currentHp = this.initialHp;
         }
     }
-        
+
+    public void DecreaseHP(int value)
+    {
+        this.currentHp -= value;
+    }
 }

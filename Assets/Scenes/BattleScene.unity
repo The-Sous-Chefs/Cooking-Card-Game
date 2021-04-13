@@ -231,11 +231,11 @@ MonoBehaviour:
   cardID: 7
   targetEnemy: {fileID: 213496028}
   curChef: {fileID: 205504934}
-  cardid: {fileID: 1308592147}
-  cardtx: {fileID: 752073535}
-  handstx: {fileID: 562943028}
-  beginninghandsNum: 4
-  hands: 
+  cardIDText: {fileID: 1308592147}
+  cardBodyText: {fileID: 752073535}
+  handText: {fileID: 562943028}
+  startingHandSize: 4
+  hand: 
 --- !u!4 &185450212
 Transform:
   m_ObjectHideFlags: 0
@@ -619,7 +619,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185450211}
-        m_MethodName: addCardNum
+        m_MethodName: IncrementCardNumber
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -749,7 +749,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185450211}
-        m_MethodName: playthiscard
+        m_MethodName: PlayCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1120,7 +1120,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185450211}
-        m_MethodName: enemyturn
+        m_MethodName: DoEnemyTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1408,7 +1408,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185450211}
-        m_MethodName: decCardNum
+        m_MethodName: DecrementCardNumber
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
