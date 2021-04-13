@@ -50,6 +50,7 @@ public class BattleManager : MonoBehaviour
     public Text deckSizeText;
     public Text discardPileSizeText;
     public Text dccsContentsText;
+    public Image monsterSwitcherImage;
     void Start()
     {
         // initialize the deck, discardPile, hand, and DCCS
@@ -374,9 +375,17 @@ public class BattleManager : MonoBehaviour
         // since nothing will call StartPlayerTurn() at that point)
         DrawCard();
     }
+    
+    private void MakeTransparent()
+    {
+        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,0);
+    }
 
     public void DoEnemyTurn()
     {
+        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,255);
+        Invoke("MakeTransparent", 1);
+
         if (!targetEnemy.demoMonster.stunned) {
             int curAction = targetEnemy.demoMonster.actionpattern[enemyPatternIndex];
             Debug.Log("Enemy turn start : " + curAction);
@@ -402,6 +411,7 @@ public class BattleManager : MonoBehaviour
             }
         } 
         curChef.buffupdate();
+
     }
 
     private void HandleEnemyAttack()
