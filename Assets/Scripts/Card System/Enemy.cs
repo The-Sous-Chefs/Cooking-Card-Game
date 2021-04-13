@@ -22,5 +22,10 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         hptxt.text = "Hp :" + demoMonster.currentHp;
+        if (demoMonster.stunned) {
+            GetComponent<Image>().color = Color.red;
+        } else {
+            GetComponent<Image>().color = Color.white;
+        }
     }
 }

@@ -50,7 +50,6 @@ public class BattleManager : MonoBehaviour
     public Text deckSizeText;
     public Text discardPileSizeText;
     public Text dccsContentsText;
-
     void Start()
     {
         // initialize the deck, discardPile, hand, and DCCS
@@ -73,7 +72,11 @@ public class BattleManager : MonoBehaviour
 
     void Update()
     {
-        cardID = hand[cardIndex];
+        if (hand.Count != 0) {
+            cardID = hand[cardIndex];
+        } else {
+            cardID = 0;
+        }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
         cardIDText.text = "Card ID: " + cardID + ", Name: " + currentCard.name + ", Cost: " + currentCard.cost;
         cardBodyText.text = currentCard.cardText;
@@ -205,6 +208,7 @@ public class BattleManager : MonoBehaviour
         AOEDamageHandler();
         HealHandler();
         BlockHandler();
+        stunHandler();
         // discard before drawing, in case of cards that say discard X, then
         // draw Y
         DiscardHandler();
@@ -229,6 +233,16 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Dealing " + currentCard.aoeDamage + " damage to all");
             targetEnemy.demoMonster.DecreaseHP(currentCard.aoeDamage);
+            return true;
+        }
+        return false;
+    }
+
+    private bool stunHandler(){
+        if(currentCard.stuns)
+        {
+            Debug.Log("stun the enemy");
+            targetEnemy.demoMonster.getStunned();
             return true;
         }
         return false;
@@ -336,27 +350,31 @@ public class BattleManager : MonoBehaviour
 
     public void DoEnemyTurn()
     {
-        int curAction = targetEnemy.demoMonster.actionpattern[enemyPatternIndex];
-        Debug.Log("Enemy turn start : " + curAction);
-        switch(curAction)
-        {
-            case 0:
-                break;
-            case 1:
-                HandleEnemyAttack();
-                break;
-            case 2:
-                HandleEnemySpecialSkill();
-                break;
-            default:
-                Debug.Log("Invalid behavior in monster: " + targetEnemy.demoMonster.name);
-                break;
-        }
+        if (!targetEnemy.demoMonster.stunned) {
+            int curAction = targetEnemy.demoMonster.actionpattern[enemyPatternIndex];
+            Debug.Log("Enemy turn start : " + curAction);
+            switch(curAction)
+            {
+                case 0:
+                    break;
+                case 1:
+                    HandleEnemyAttack();
+                    break;
+                case 2:
+                    HandleEnemySpecialSkill();
+                    break;
+                default:
+                    Debug.Log("Invalid behavior in monster: " + targetEnemy.demoMonster.name);
+                    break;
+            }
 
-        enemyPatternIndex += 1;
-        if(enemyPatternIndex == targetEnemy.demoMonster.actionpattern.Length)
-        {
-            enemyPatternIndex = 0;
+            enemyPatternIndex += 1;
+            if(enemyPatternIndex == targetEnemy.demoMonster.actionpattern.Length)
+            {
+                enemyPatternIndex = 0;
+            }
+        } else {
+            targetEnemy.demoMonster.clearEffect();
         }
         curChef.buffupdate();
     }
@@ -383,7 +401,12 @@ public class BattleManager : MonoBehaviour
         {
             cardIndex = 0;
         }
-        cardID = hand[cardIndex]; 
+        // To get rid of OutOfRange
+        if(hand.Count != 0) {
+            cardID = hand[cardIndex]; 
+        } else {
+            cardID = 0;
+        }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
     }
 
@@ -394,7 +417,12 @@ public class BattleManager : MonoBehaviour
         {
             cardIndex = hand.Count - 1;
         }
-        cardID = hand[cardIndex]; 
+        // To get rid of OutOfRange
+        if(hand.Count != 0) {
+            cardID = hand[cardIndex]; 
+        } else {
+            cardID = 0;
+        }
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
     }
 

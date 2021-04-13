@@ -11,6 +11,7 @@ public struct Monster
     public int basicAtt;
     public int skilleffect;
     public int[] actionpattern;
+    public bool stunned;
 
     public Monster(string name, int level, int initialHp, int basicAtt, int skilleffect, int[] action)
     {
@@ -22,6 +23,7 @@ public struct Monster
         this.currentHp = initialHp;
         //default action pattern, 1 means attack, 2 means skill, 0 means rest
         this.actionpattern = action;
+        this.stunned = false;
     }
 
     public void IncreaseHP(int value)
@@ -36,5 +38,15 @@ public struct Monster
     public void DecreaseHP(int value)
     {
         this.currentHp -= value;
+    }
+
+    public void getStunned() {
+        stunned = true;
+    }
+
+    public void clearEffect() {
+        //will initialize all the buff/debuff here since we will count that in our DCCS very turn
+        stunned = false;
+
     }
 }
