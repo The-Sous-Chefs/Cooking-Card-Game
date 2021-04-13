@@ -64,7 +64,8 @@ public class BattleManager : MonoBehaviour
         {
             DrawCard();
         }
-
+        //debugging card
+        hand.Add(12);
         cardID = hand[0];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
         Debug.Log("Card " + currentCard.name + " loaded.");
@@ -313,6 +314,11 @@ public class BattleManager : MonoBehaviour
     {
         // handle cards in the DCCS
         List<int> cardsToRemove = new List<int>();
+
+        //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.
+        targetEnemy.demoMonster.clearEffect();
+
+
         for(int i = 0; i < dccs.Count; i++)
         {
             bool cooldownOver = dccs[i].DecrementCounter();
@@ -342,6 +348,7 @@ public class BattleManager : MonoBehaviour
             dccs.RemoveAt(cardsToRemove[i]);
             discardPile.Add(removedCard);
         }
+    
 
         // the player draws a card every turn (except, technically, the first,
         // since nothing will call StartPlayerTurn() at that point)
@@ -373,9 +380,7 @@ public class BattleManager : MonoBehaviour
             {
                 enemyPatternIndex = 0;
             }
-        } else {
-            targetEnemy.demoMonster.clearEffect();
-        }
+        } 
         curChef.buffupdate();
     }
 
