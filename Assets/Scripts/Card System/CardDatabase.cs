@@ -25,7 +25,7 @@ public class CardDatabase
             }
             else
             {
-                Debug.Log("Using the existing card database");
+                // Debug.Log("Using the existing card database");
             }
             return CardDatabase.instance;
         }
@@ -172,11 +172,41 @@ public class CardDatabase
         ));
     }
 
+    public bool CardIDExists(int id)
+    {
+        return (id >= 0) && (id < cardsInGame.Count);
+    }
+
     public Card GetCardByID(int id)
     {
-        Debug.Assert(id >= 0);
-        Debug.Assert(id < cardsInGame.Count);
+        Debug.Assert(CardIDExists(id));
         return cardsInGame[id];
+    }
+
+    public List<int> GetBasicAbilityIDs()
+    {
+        List<int> basicAbilityIDs = new List<int>();
+        for(int i = 0; i < cardsInGame.Count; i++)
+        {
+            if(cardsInGame[i].cardType == CardType.BASIC)
+            {
+                basicAbilityIDs.Add(i);
+            }
+        }
+        return basicAbilityIDs;
+    }
+
+    public List<int> GetAllCardIDs()
+    {
+        List<int> nonBasicIDs = new List<int>();
+        for(int i = 0; i < cardsInGame.Count; i++)
+        {
+            if(cardsInGame[i].cardType != CardType.BASIC)
+            {
+                nonBasicIDs.Add(i);
+            }
+        }
+        return nonBasicIDs;
     }
 
     // we may want methods here to return random cards, when the player is

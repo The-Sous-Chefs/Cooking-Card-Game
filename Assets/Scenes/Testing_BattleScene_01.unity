@@ -228,14 +228,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e49f707618fd37d489ee8aef990a2171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck: 
+  discardPile: 
+  hand: 
   cardID: 7
   targetEnemy: {fileID: 213496028}
   curChef: {fileID: 205504934}
   cardIDText: {fileID: 1308592147}
   cardBodyText: {fileID: 752073535}
   handText: {fileID: 562943028}
-  startingHandSize: 4
-  hand: 
 --- !u!4 &185450212
 Transform:
   m_ObjectHideFlags: 0
@@ -1121,6 +1122,17 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 185450211}
         m_MethodName: DoEnemyTurn
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 185450211}
+        m_MethodName: StartPlayerTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

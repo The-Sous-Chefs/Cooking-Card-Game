@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum CardType
 {
+    BASIC,
     IMMEDIATE,
     DELAYED,
     CONTINUOUS
@@ -74,9 +75,11 @@ public struct Card
 
         switch(cardType)
         {
-            case "Immediate":
             case "Basic":
-                // Basic abilities function like Immediate cards
+                this.cardType = CardType.BASIC;
+                break;
+
+            case "Immediate":
                 this.cardType = CardType.IMMEDIATE;
                 break;
 
@@ -148,7 +151,10 @@ public struct Card
                     "Immediate cards should have 0 turns in play."
             );
         }
-        else
+        else if(
+                this.cardType == CardType.DELAYED ||
+                this.cardType == CardType.CONTINUOUS
+        )
         {
             Debug.Assert(
                 this.turnsInPlay > 0,
@@ -159,7 +165,14 @@ public struct Card
 
     public override string ToString()
     {
-        string lineOne = name +",\tCost: " + cost;
+        string lineOne = name + ",\tCost: " + cost;
+        string lineTwo = cardText;
+        return lineOne + "\n" + lineTwo;
+    }
+
+    public string AllInfoToString()
+    {
+        string lineOne = name + ",\tCost: " + cost;
         string lineTwo = System.Enum.GetName(typeof(CardType), cardType) + " (";
         for(int i = 0; i < cardClasses.Count; i++)
         {

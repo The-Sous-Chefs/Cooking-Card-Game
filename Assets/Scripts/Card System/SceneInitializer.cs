@@ -21,8 +21,10 @@ public class SceneInitializer : MonoBehaviour
         // doing it in every scene makes sure we can't get into a state where
         // they're not there when we expect them to be
 
-        // simply accessing CardDatabase.Instance will make sure it exists
+        // simply accessing the Instances will make sure they exist
         cardDB = CardDatabase.Instance;
+        // PlayerStats uses CardDatabase, so do it second (even though
+        // it would technically cause CardDatabase to be instanced, itself)
         playerStats = PlayerStats.Instance;
     }
 }

@@ -20,7 +20,7 @@ public class PlayerStats
             }
             else
             {
-            //    Debug.Log("Using the existing player stats singleton.");
+                // Debug.Log("Using the existing player stats singleton.");
             }
             return PlayerStats.instance;
         }
@@ -34,6 +34,7 @@ public class PlayerStats
     private int currentHealth;
     private int maxGlobalMana;
     private int currentGlobalMana;
+    private List<int> collectedCardIDs;
 
     PlayerStats()
     {
@@ -41,6 +42,13 @@ public class PlayerStats
         currentHealth = maxHealth;
         maxGlobalMana = Constants.MAX_GLOBAL_MANA;
         currentGlobalMana = maxGlobalMana;
+        collectedCardIDs = new List<int>();
+
+        // TEMPORARY: Include one of every card in the player's collectedCardIDs
+        foreach(int id in CardDatabase.Instance.GetAllCardIDs())
+        {
+            CollectCardByID(id);
+        }
     }
 
     public void ApplyDamage(int damage)
@@ -114,6 +122,17 @@ public class PlayerStats
     public float GetGlobalManaAsPercentage()
     {
         return ((float) currentGlobalMana) / ((float) maxGlobalMana);
+    }
+
+    public void CollectCardByID(int id)
+    {
+        Debug.Assert(CardDatabase.Instance.CardIDExists(id));
+        collectedCardIDs.Add(id);
+    }
+
+    public List<int> GetCollectedCardIDs()
+    {
+        return new List<int>(collectedCardIDs);
     }
 
     public override string ToString()

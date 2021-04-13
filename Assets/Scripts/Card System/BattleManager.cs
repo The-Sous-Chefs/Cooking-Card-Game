@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 public class BattleManager : MonoBehaviour
 {
+    public List<int> deck;
+    public List<int> discardPile;
+    public List<int> hand;
     [SerializeField] private int cardID;
     [SerializeField] private Enemy targetEnemy;
     [SerializeField] private Tempchef curChef;
@@ -16,12 +19,21 @@ public class BattleManager : MonoBehaviour
     public Text cardIDText;
     public Text cardBodyText;
     public Text handText;
-    public int startingHandSize;
-    public List<int> hand;
 
     void Start()
     {
-        handsInitialize();
+        // initialize the deck, discardPile, and hand
+        deck = PlayerStats.Instance.GetCollectedCardIDs();
+        ShuffleDeck();
+        discardPile = new List<int>();
+        hand = new List<int>();
+
+        // draw the player's opening hand
+        for(int i = 0; i < Constants.STARTING_HAND_SIZE; i++)
+        {
+            DrawCard();
+        }
+
         cardID = hand[0];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
         Debug.Log("Card " + currentCard.name + " loaded.");
@@ -36,27 +48,60 @@ public class BattleManager : MonoBehaviour
         handText.text = IntListToString(hand);
     }
 
-    private void handsInitialize()
+    private void ShuffleDeck()
     {
-        hand = new List<int>();
-        for(int i = 0; i < startingHandSize; i++) {
-            //randomly draw cards
-            hand.Add(UnityEngine.Random.Range(0, 30));
+        // shuffle with the Fisher-Yates algorithm
+        int indexA = deck.Count;
+        while(indexA > 1)
+        {
+            indexA--;
+            int indexB = UnityEngine.Random.Range(0, indexA + 1);
+            int temp = deck[indexB];
+            deck[indexB] = deck[indexA];
+            deck[indexA] = temp;
         }
+    }
+
+    private void DrawCard()
+    {
+        if(deck.Count == 0)
+        {
+            // shuffle the discard pile into the deck
+            deck = new List<int>(discardPile);
+            ShuffleDeck();
+            discardPile = new List<int>();
+        }
+
+        int lastIndex = deck.Count - 1;
+        int topCard = deck[lastIndex];
+        deck.RemoveAt(lastIndex);
+        hand.Add(topCard);
+    }
+
+    private void DiscardCardAtRandom()
+    {
+        int discardIndex = UnityEngine.Random.Range(0, hand.Count);
+        int discardedCard = hand[discardIndex];
+        hand.RemoveAt();
+        discardedCard.Add(discardedCard);
     }
 
     public void PlayCard()
     {
         Debug.Log("Scanning " + currentCard.name);
-        //only if remaining mana is affordable
+        // only if remaining mana is affordable
         if(CanPayCost()) {
             TargettedDamageHandler(targetEnemy);
+            AOEDamageHandler();
             HealHandler();
             BlockHandler();
-            AOEDamageHandler();
-            DrawHandler();
+            // discard before drawing, in case of cards that say discard X, then
+            // draw Y
             DiscardHandler();
+            DrawHandler();
+            int playedCard = hand[cardIndex];
             hand.RemoveAt(cardIndex);
+            discardPile.Add(playedCard);
             // need to do range things, will fix later
             cardIndex = 0;
         } else {
@@ -127,30 +172,37 @@ public class BattleManager : MonoBehaviour
     {
         if(currentCard.draw > 0)
         {
-            for(int i = 0; i <currentCard.draw; i++)
+            for(int i = 0; i < currentCard.draw; i++)
             {
-                hand.Add(UnityEngine.Random.Range(0, 30));
+                DrawCard();
             }
             return true;
         }
         return false;
     }
 
-    //randomly discard some number of cards 
+    // randomly discard some number of cards 
     private bool DiscardHandler()
     {
          if(currentCard.discard > 0)
          {
-            for(int i = 0; i <currentCard.discard; i++)
+            for(int i = 0; i < currentCard.discard; i++)
             {
                 if(hand.Count > 0)
                 {
-                    hand.RemoveAt(UnityEngine.Random.Range(0, hand.Count));
+                    DiscardCardAtRandom();
                 }
             }
             return true;
         }
         return false;
+    }
+
+    public void StartPlayerTurn()
+    {
+        // the player draws a card every turn (except, technically, the first,
+        // since nothing will call StartPlayerTurn() at that point)
+        DrawCard();
     }
 
     public void DoEnemyTurn()

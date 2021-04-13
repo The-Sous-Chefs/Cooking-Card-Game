@@ -23,4 +23,7 @@ public static class Constants
     // player stats related constants
     public static int MAX_HEALTH = 100;
     public static int MAX_GLOBAL_MANA = 100;
+
+    // deck-related constants
+    public static int STARTING_HAND_SIZE = 4;
 }
