@@ -14,6 +14,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        monsterList = new List<Monster>();
         Monster demoMonster = new Monster("demoMonster", 1, 50, 3, 1, new int[4] { 1, 1, 1, 2 });
         monsterList.Add(demoMonster);
         enmName.text = monsterList[0].name;
