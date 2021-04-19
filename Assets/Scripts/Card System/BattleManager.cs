@@ -38,7 +38,7 @@ public class BattleManager : MonoBehaviour
     // TEMPORARY: Just for testing before UI is implemented, should be removed
     [SerializeField] private int cardID;
     [SerializeField] private Enemy targetEnemy;
-    [SerializeField] private Tempchef curChef;
+  
     private Card currentCard;
     private int enemyPatternIndex;
     private int cardIndex;
@@ -53,6 +53,19 @@ public class BattleManager : MonoBehaviour
     public Image monsterSwitcherImage;
     public GameObject winMessage;
     public GameObject loseMessage;
+
+    //ported from original tempchef.cs
+    public Button chefMove;
+    public Text chefStatus;
+    public Text chefHpTxt;
+    public Text gmTxt;
+    public int[,] chefBuff;
+    public PlayerStats playerSta;
+
+    //Basic abilities buttons
+    public Button bscAttButton;
+    public Button bscBlcButton;
+    public Button bscRCVButton;
 
     void Start()
     {
@@ -72,6 +85,12 @@ public class BattleManager : MonoBehaviour
         // hand.Add(0);
         cardID = hand[0];
         currentCard = CardDatabase.Instance.GetCardByID(cardID);
+
+        //current buff list [0] = stunned or not 
+        // [1] = current block rate in %, the actual damage = damage gonna receive * (1 - block rate)
+        // the second value means the duration, for example buff{{1,2 }, {0,0}} means the stun will last for 2 turns
+        chefBuff = new int[2, 2] { { 0, 0 }, { 0, 0 } };
+
         Debug.Log("Card " + currentCard.name + " loaded.");
     }
 
@@ -106,6 +125,11 @@ public class BattleManager : MonoBehaviour
                     "\nThe Above Card's Cooldown is: " + card.cooldownCounter + "\n\n";
         }
         dccsContentsText.text = dccsList;
+
+        chefHpTxt.text = "Hp :" + PlayerStats.Instance.GetHealth();
+        gmTxt.text = "Global Mana :" + PlayerStats.Instance.GetGlobalMana();
+        showChefStunned();
+        chefStatus.text = "Current status: Stunned :" + chefBuff[0, 0] + " Turns remaining:" + chefBuff[0, 1] + "\r\n" + "Blocking rate:" + chefBuff[1, 0] + "%" + " Turns remaining: " + chefBuff[1, 1];
     }
 
     private void ShuffleDeck()
@@ -297,13 +321,13 @@ public class BattleManager : MonoBehaviour
             if(currentCard.cardType == CardType.IMMEDIATE )
             {
                 Debug.Log("current turn, Blocking vlaue =  " + currentCard.blockPercent);
-                curChef.blocking((int)(currentCard.blockPercent* 100),1);
+                chefBlocking((int)(currentCard.blockPercent* 100),1);
                 return true;
             }
             else
             {
                 Debug.Log( currentCard.turnsInPlay + "turn, Blocking vlaue =  " + currentCard.blockPercent);
-                curChef.blocking((int)(currentCard.blockPercent* 100),currentCard.turnsInPlay);
+                chefBlocking((int)(currentCard.blockPercent* 100),currentCard.turnsInPlay);
                 return true;
             }
         }
@@ -383,6 +407,7 @@ public class BattleManager : MonoBehaviour
         // the player draws a card every turn (except, technically, the first,
         // since nothing will call StartPlayerTurn() at that point)
         DrawCard();
+        ChangeBAButton(true);
     }
     
     private void MakeTransparent()
@@ -420,15 +445,15 @@ public class BattleManager : MonoBehaviour
                 enemyPatternIndex = 0;
             }
         } 
-        curChef.buffupdate();
+        buffupdate();
 
     }
 
     private void HandleEnemyAttack()
     {
         Debug.Log("og damgade:"+targetEnemy.demoMonster.basicAtt );
-        int damagedealed = targetEnemy.demoMonster.basicAtt * (100 - curChef.buff[1,0])/100;
-        Debug.Log("percentage:"+ curChef.buff[1,0] );
+        int damagedealed = targetEnemy.demoMonster.basicAtt * (100 - chefBuff[1,0])/100;
+        Debug.Log("percentage:"+ chefBuff[1,0] );
         PlayerStats.Instance.ApplyDamage(damagedealed);
         if(PlayerStats.Instance.GetHealthAsPercentage() <= 0.0f)
         {
@@ -439,7 +464,7 @@ public class BattleManager : MonoBehaviour
     private void HandleEnemySpecialSkill()
     {
         // turns plus 1 because the counter will decrease once enemy finish its move
-        curChef.getStunned(targetEnemy.demoMonster.skilleffect +1);
+        chefGetStunned(targetEnemy.demoMonster.skilleffect +1);
         Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
     }
 
@@ -452,6 +477,7 @@ public class BattleManager : MonoBehaviour
             ResolveCardEffects();
         }
         currentCard = temp;
+        ChangeBAButton(false);
     }
 
     private void PlayerWins()
@@ -473,6 +499,7 @@ public class BattleManager : MonoBehaviour
     public void BasicAttack()
     {
         BasicAbility(1);
+
     }
 
     public void BasicBlock()
@@ -484,6 +511,16 @@ public class BattleManager : MonoBehaviour
     {
         BasicAbility(3);
     }
+
+    private void ChangeBAButton(Boolean state)
+    {
+        bscAttButton.interactable = state;
+        bscBlcButton.interactable = state;
+        bscRCVButton.interactable = state;
+    }
+
+   
+
 
     public void IncrementCardNumber()
     {
@@ -533,5 +570,48 @@ public class BattleManager : MonoBehaviour
         str += "]";
         return str;
     }
+
+
+    // tempchef
+    // easy to read since we don't have much status now
+    private void chefGetStunned(int turns)
+    {
+        chefBuff[0, 0] = 1;
+        chefBuff[0, 1] = turns;
+    }
+
+    private void chefBlocking(int blockrate, int turns)
+    {
+        chefBuff[1, 0] = blockrate;
+        chefBuff[1, 1] = turns;
+    }
+
+    // to update as turns pass, once the remaining turns for one status become 0, set the value of that status to 0 to neutralize the buff.
+    private void buffupdate()
+    {
+        // go through all the status we have, and decrease the turns number
+        for (int i = 0; i < chefBuff.GetLength(0); i++)
+        {
+            chefBuff[i, 1] -= 1;
+            if (chefBuff[i, 1] <= 0)
+            {
+                chefBuff[i, 1] = 0;
+                chefBuff[i, 0] = 0;
+            }
+        }
+    }
+
+    private void showChefStunned()
+    {
+        if (chefBuff[0, 0] != 0)
+        {
+            chefMove.interactable = false;
+        }
+        else
+        {
+            chefMove.interactable = true;
+        }
+    }
+
 }
 
