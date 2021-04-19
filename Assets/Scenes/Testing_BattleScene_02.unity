@@ -643,7 +643,6 @@ MonoBehaviour:
   hand: 
   cardID: 7
   targetEnemy: {fileID: 213496028}
-  curChef: {fileID: 205504934}
   cardIDText: {fileID: 1308592147}
   cardBodyText: {fileID: 752073535}
   handText: {fileID: 562943028}
@@ -654,6 +653,13 @@ MonoBehaviour:
   monsterSwitcherImage: {fileID: 544649322}
   winMessage: {fileID: 720545050}
   loseMessage: {fileID: 1671747182}
+  chefMove: {fileID: 261687820}
+  chefStatus: {fileID: 570844421}
+  chefHpTxt: {fileID: 1593662666}
+  gmTxt: {fileID: 1593662666}
+  bscAttButton: {fileID: 986402036}
+  bscBlcButton: {fileID: 1682102263}
+  bscRCVButton: {fileID: 62677779}
 --- !u!4 &185450212
 Transform:
   m_ObjectHideFlags: 0

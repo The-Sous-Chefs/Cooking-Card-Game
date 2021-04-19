@@ -266,8 +266,8 @@ public class BattleManager : MonoBehaviour
         if(currentCard.singleDamage > 0)
         {
             Debug.Log("Dealing " + currentCard.singleDamage + " damage to " + targetEnemy.enmName);
-            targetEnemy.demoMonster.DecreaseHP(currentCard.singleDamage);
-            if(targetEnemy.demoMonster.currentHp <= 0)
+            targetEnemy.monsterList[0].DecreaseHP(currentCard.singleDamage);
+            if(targetEnemy.monsterList[0].currentHp <= 0)
             {
                 PlayerWins();
             }
@@ -282,8 +282,8 @@ public class BattleManager : MonoBehaviour
         if(currentCard.aoeDamage > 0)
         {
             Debug.Log("Dealing " + currentCard.aoeDamage + " damage to all");
-            targetEnemy.demoMonster.DecreaseHP(currentCard.aoeDamage);
-            if(targetEnemy.demoMonster.currentHp <= 0)
+            targetEnemy.monsterList[0].DecreaseHP(currentCard.aoeDamage);
+            if(targetEnemy.monsterList[0].currentHp <= 0)
             {
                 PlayerWins();
             }
@@ -297,7 +297,7 @@ public class BattleManager : MonoBehaviour
         if(currentCard.stuns)
         {
             Debug.Log("Stunning the enemy");
-            targetEnemy.demoMonster.getStunned();
+            targetEnemy.monsterList[0].getStunned();
             return true;
         }
         return false;
@@ -370,7 +370,7 @@ public class BattleManager : MonoBehaviour
         List<int> cardsToRemove = new List<int>();
 
         //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.
-        targetEnemy.demoMonster.clearEffect();
+        targetEnemy.monsterList[0].clearEffect();
 
 
         for(int i = 0; i < dccs.Count; i++)
@@ -420,9 +420,9 @@ public class BattleManager : MonoBehaviour
         monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,255);
         Invoke("MakeTransparent", 1);
 
-        if (!targetEnemy.demoMonster.stunned)
+        if (!targetEnemy.monsterList[0].stunned)
         {
-            int curAction = targetEnemy.demoMonster.actionpattern[enemyPatternIndex];
+            int curAction = targetEnemy.monsterList[0].actionpattern[enemyPatternIndex];
             Debug.Log("Enemy turn start : " + curAction);
             switch(curAction)
             {
@@ -435,12 +435,12 @@ public class BattleManager : MonoBehaviour
                     HandleEnemySpecialSkill();
                     break;
                 default:
-                    Debug.Log("Invalid behavior in monster: " + targetEnemy.demoMonster.name);
+                    Debug.Log("Invalid behavior in monster: " + targetEnemy.monsterList[0].name);
                     break;
             }
 
             enemyPatternIndex += 1;
-            if(enemyPatternIndex == targetEnemy.demoMonster.actionpattern.Length)
+            if(enemyPatternIndex == targetEnemy.monsterList[0].actionpattern.Length)
             {
                 enemyPatternIndex = 0;
             }
@@ -451,8 +451,8 @@ public class BattleManager : MonoBehaviour
 
     private void HandleEnemyAttack()
     {
-        Debug.Log("og damgade:"+targetEnemy.demoMonster.basicAtt );
-        int damagedealed = targetEnemy.demoMonster.basicAtt * (100 - chefBuff[1,0])/100;
+        Debug.Log("og damgade:"+targetEnemy.monsterList[0].basicAtt );
+        int damagedealed = targetEnemy.monsterList[0].basicAtt * (100 - chefBuff[1,0])/100;
         Debug.Log("percentage:"+ chefBuff[1,0] );
         PlayerStats.Instance.ApplyDamage(damagedealed);
         if(PlayerStats.Instance.GetHealthAsPercentage() <= 0.0f)
@@ -464,8 +464,8 @@ public class BattleManager : MonoBehaviour
     private void HandleEnemySpecialSkill()
     {
         // turns plus 1 because the counter will decrease once enemy finish its move
-        chefGetStunned(targetEnemy.demoMonster.skilleffect +1);
-        Debug.Log(targetEnemy.demoMonster.name + " spelled its skill." +targetEnemy.demoMonster.skilleffect);
+        chefGetStunned(targetEnemy.monsterList[0].skilleffect +1);
+        Debug.Log(targetEnemy.monsterList[0].name + " spelled its skill." +targetEnemy.monsterList[0].skilleffect);
     }
 
     private void BasicAbility(int id)
