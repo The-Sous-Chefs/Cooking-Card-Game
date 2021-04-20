@@ -309,7 +309,7 @@ RectTransform:
   m_Children:
   - {fileID: 85238247}
   m_Father: {fileID: 174191200}
-  m_RootOrder: 10
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -594,9 +594,7 @@ RectTransform:
   - {fileID: 421760626}
   - {fileID: 642004841}
   - {fileID: 232144498}
-  - {fileID: 562943027}
   - {fileID: 1308592146}
-  - {fileID: 752073534}
   - {fileID: 461226288}
   - {fileID: 986402035}
   - {fileID: 1682102262}
@@ -619,6 +617,7 @@ GameObject:
   m_Component:
   - component: {fileID: 185450212}
   - component: {fileID: 185450211}
+  - component: {fileID: 185450213}
   m_Layer: 0
   m_Name: BattleControl
   m_TagString: Untagged
@@ -641,25 +640,12 @@ MonoBehaviour:
   deck: 
   discardPile: 
   hand: 
-  cardID: 7
+  boardManagerObject: {fileID: 185450210}
   targetEnemy: {fileID: 213496028}
-  cardIDText: {fileID: 1308592147}
-  cardBodyText: {fileID: 752073535}
-  handText: {fileID: 562943028}
-  handListText: {fileID: 1045764058}
-  deckSizeText: {fileID: 1656672214}
-  discardPileSizeText: {fileID: 559647392}
-  dccsContentsText: {fileID: 1735236500}
+  handText: {fileID: 0}
   monsterSwitcherImage: {fileID: 544649322}
-  winMessage: {fileID: 720545050}
-  loseMessage: {fileID: 1671747182}
   chefMove: {fileID: 261687820}
   chefStatus: {fileID: 570844421}
-  chefHpTxt: {fileID: 1593662666}
-  gmTxt: {fileID: 1593662666}
-  bscAttButton: {fileID: 986402036}
-  bscBlcButton: {fileID: 1682102263}
-  bscRCVButton: {fileID: 62677779}
 --- !u!4 &185450212
 Transform:
   m_ObjectHideFlags: 0
@@ -674,6 +660,34 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &185450213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185450210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 132c8c2c2ab984d77b42b042e21ee200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chefHPText: {fileID: 1593662666}
+  chefManaText: {fileID: 1430976083}
+  chefStatusText: {fileID: 570844421}
+  handListText: {fileID: 1045764058}
+  deckSizeText: {fileID: 1656672214}
+  discardPileSizeText: {fileID: 559647392}
+  dccsContentsText: {fileID: 1735236500}
+  selectedCardText: {fileID: 1308592147}
+  incrementButton: {fileID: 232144499}
+  decrementButton: {fileID: 642004842}
+  playButton: {fileID: 261687820}
+  basicAttackButton: {fileID: 986402036}
+  basicBlockButton: {fileID: 1682102263}
+  basicManaRefreshButton: {fileID: 62677779}
+  winMessage: {fileID: 720545050}
+  loseMessage: {fileID: 1671747182}
 --- !u!1 &197123053
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,7 +798,6 @@ GameObject:
   - component: {fileID: 205504931}
   - component: {fileID: 205504933}
   - component: {fileID: 205504932}
-  - component: {fileID: 205504934}
   m_Layer: 5
   m_Name: chef
   m_TagString: Untagged
@@ -852,22 +865,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 205504930}
   m_CullTransparentMesh: 0
---- !u!114 &205504934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 205504930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 912c1dbf0762e6242aa203ad59f43141, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chefmove: {fileID: 261687820}
-  status: {fileID: 570844421}
-  hptxt: {fileID: 1593662666}
-  gmtxt: {fileID: 1430976083}
 --- !u!1 &213496024
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,7 +955,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5eab385953e29b439223695584d09fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyHp: 10
   hptxt: {fileID: 1192642095}
   enmName: {fileID: 297908864}
 --- !u!1 &216949494
@@ -1121,8 +1117,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: IncrementCardNumber
+      - m_Target: {fileID: 185450213}
+        m_MethodName: IncrementCurrentCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1329,8 +1325,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: PlayCard
+      - m_Target: {fileID: 185450213}
+        m_MethodName: PlayCurrentCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1723,7 +1719,7 @@ RectTransform:
   m_Children:
   - {fileID: 1739132180}
   m_Father: {fileID: 174191200}
-  m_RootOrder: 7
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1773,19 +1769,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: StartPlayerTurn
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 185450211}
-        m_MethodName: DoEnemyTurn
+      - m_Target: {fileID: 185450213}
+        m_MethodName: EndPlayerTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2021,84 +2006,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 559647390}
   m_CullTransparentMesh: 0
---- !u!1 &562943026
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 562943027}
-  - component: {fileID: 562943029}
-  - component: {fileID: 562943028}
-  m_Layer: 5
-  m_Name: Current Hands
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &562943027
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562943026}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 174191200}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -72}
-  m_SizeDelta: {x: 160, y: 30}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &562943028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562943026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
-  m_RaycastTarget: 1
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 4
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
-  m_Text: Current Hands
---- !u!222 &562943029
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562943026}
-  m_CullTransparentMesh: 0
 --- !u!1 &570844420
 GameObject:
   m_ObjectHideFlags: 0
@@ -2298,8 +2205,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: DecrementCardNumber
+      - m_Target: {fileID: 185450213}
+        m_MethodName: DecrementCurrentCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2383,86 +2290,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &752073533
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 752073534}
-  - component: {fileID: 752073536}
-  - component: {fileID: 752073535}
-  m_Layer: 5
-  m_Name: cardtx
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &752073534
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 752073533}
-  m_LocalRotation: {x: -0, y: 0.007517038, z: -0, w: 0.9999718}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 174191200}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0.86100006, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -132}
-  m_SizeDelta: {x: 160, y: 30}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &752073535
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 752073533}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
-  m_RaycastTarget: 1
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 4
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
-  m_Text: 'Selected Card description
-
-'
---- !u!222 &752073536
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 752073533}
-  m_CullTransparentMesh: 0
 --- !u!1 &908638245
 GameObject:
   m_ObjectHideFlags: 0
@@ -2575,7 +2402,7 @@ RectTransform:
   m_Children:
   - {fileID: 4619949}
   m_Father: {fileID: 174191200}
-  m_RootOrder: 8
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3116,7 +2943,7 @@ GameObject:
   - component: {fileID: 1308592148}
   - component: {fileID: 1308592147}
   m_Layer: 5
-  m_Name: cardid
+  m_Name: Card Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3134,12 +2961,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 174191200}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -102}
-  m_SizeDelta: {x: 317.54633, y: 30.84851}
+  m_AnchoredPosition: {x: 0, y: -125}
+  m_SizeDelta: {x: 320, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1308592147
 MonoBehaviour:
@@ -3167,7 +2994,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
-    m_Alignment: 4
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -3876,7 +3703,7 @@ RectTransform:
   m_Children:
   - {fileID: 1255017984}
   m_Father: {fileID: 174191200}
-  m_RootOrder: 9
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

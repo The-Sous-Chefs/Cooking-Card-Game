@@ -2,7 +2,7 @@ Name,Cost,Type,Turns In Play,Damage,AOE Damage,Heal,Draw,Discard,Mana Regen,Bloc
 Empty,9999,Basic,,,,,,,,,,,,No card selected
 Attack,3,Basic,,3,,,,,,,,,,Deal 3 damage to an enemy.
 Block,3,Basic,,,,,,,,0.5,,,,Block 50% of incoming damage this turn. (Blocking over 100% will reflect the excess percent of damage)
-Recover Mana,0,Basic,,,,,,,4,,,,,"Discard one card, regenerate 4 global mana."
+Recover Mana,0,Basic,,,,,,1,4,,,,,"Discard one card, regenerate 4 global mana."
 Slice,1,Immediate ,,5,,,,,,,,,,Deal 5 damage to an enemy.
 Frying Pan Shield,1,Immediate ,,,,,,,,0.4,,,,Block 40% of the incoming damage this turn.
 Name7,2,Immediate ,,8,,,,,,,,,,Deal 8 damage to an enemy.
