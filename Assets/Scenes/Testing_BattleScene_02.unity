@@ -642,7 +642,6 @@ MonoBehaviour:
   hand: 
   boardManagerObject: {fileID: 185450210}
   targetEnemy: {fileID: 213496028}
-  handText: {fileID: 0}
   monsterSwitcherImage: {fileID: 544649322}
   chefMove: {fileID: 261687820}
   chefStatus: {fileID: 570844421}
@@ -686,6 +685,7 @@ MonoBehaviour:
   basicAttackButton: {fileID: 986402036}
   basicBlockButton: {fileID: 1682102263}
   basicManaRefreshButton: {fileID: 62677779}
+  monsterSwitcherImage: {fileID: 544649322}
   winMessage: {fileID: 720545050}
   loseMessage: {fileID: 1671747182}
 --- !u!1 &197123053

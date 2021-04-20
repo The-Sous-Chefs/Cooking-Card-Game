@@ -40,6 +40,8 @@ public class TestUIManager : MonoBehaviour, IUIManager
     [SerializeField] private Button basicBlockButton;
     [SerializeField] private Button basicManaRefreshButton;
 
+    [SerializeField] private Image monsterSwitcherImage;
+
     [SerializeField] private GameObject winMessage;
     [SerializeField] private GameObject loseMessage;
 
@@ -91,8 +93,15 @@ public class TestUIManager : MonoBehaviour, IUIManager
         }
     }
 
+    private void MakeMonsterSwitcherTransparent()
+    {
+        monsterSwitcherImage.color = new Color(255, 255, 255, 0);
+    }
+
     public void EndPlayerTurn()
     {
+        monsterSwitcherImage.color = new Color(255, 255, 255, 255);
+        Invoke("MakeMonsterSwitcherTransparent", 1);
         if(PlayerTurnEndedEvent != null)
         {
             PlayerTurnEndedEvent();

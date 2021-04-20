@@ -42,9 +42,6 @@ public class BattleManager : MonoBehaviour
 
     private int enemyPatternIndex;
 
-    public Text handText;
-    public Image monsterSwitcherImage;
-
     //ported from original tempchef.cs
     public Button chefMove;
     public Text chefStatus;
@@ -437,18 +434,10 @@ public class BattleManager : MonoBehaviour
         DoEnemyTurn();
         StartPlayerTurn();
     }
-    
-    private void MakeTransparent()
-    {
-        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,0);
-    }
 
     // NOTE: This method used to be public and called directly by a button
     private void DoEnemyTurn()
     {
-        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,255);
-        Invoke("MakeTransparent", 1);
-
         if (!targetEnemy.monsterList[0].stunned)
         {
             int curAction = targetEnemy.monsterList[0].actionpattern[enemyPatternIndex];
