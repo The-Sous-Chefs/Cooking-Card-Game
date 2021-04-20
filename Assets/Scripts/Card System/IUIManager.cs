@@ -38,11 +38,11 @@ public interface IUIManager
 
     void RemoveCardFromHand(int cardID, bool discarded);
 
-    void PutCardInDCCS(int cardID);
+    void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 
-    void RemoveCardFromDCCS(int cardID);
+    void RemoveCardFromDCCS(int dccsSlot);
 
-    void UpdateDCCSCounts();
+    void UpdateDCCSCount(int dccsSlot, int newCountDown);
 
     void DeactivateBasicAbilities();
 

@@ -33,7 +33,7 @@ public class BattleManager : MonoBehaviour
     public List<int> deck;
     public List<int> discardPile;
     public List<int> hand;
-    public List<DCCard> dccs;
+    public Dictionary<int, DCCard> dccs;
     [SerializeField] private GameObject boardManagerObject;
     private IUIManager boardManager;
 
@@ -70,7 +70,7 @@ public class BattleManager : MonoBehaviour
         ShuffleDeck();
         discardPile = new List<int>();
         hand = new List<int>();
-        dccs = new List<DCCard>();
+        dccs = new Dictionary<int, DCCard>();
 
         // draw the player's opening hand
         for(int i = 0; i < Constants.STARTING_HAND_SIZE; i++)
@@ -157,13 +157,32 @@ public class BattleManager : MonoBehaviour
         boardManager.RemoveCardFromHand(discardedCard, true);
     }
 
+    private int AddCardToDCCS(int cardID)
+    {
+        Debug.Assert(dccs.Count < Constants.DCCS_SIZE, "Tried to add a card to DCCS when it was full!");
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
+        {
+            if(!dccs.ContainsKey(i))
+            {
+                Card dcCard = CardDatabase.Instance.GetCardByID(cardID);
+                dccs.Add(i, new DCCard(cardID, dcCard.turnsInPlay));
+                return i;
+            }
+        }
+
+        // return -1 to indicate that the DCCS was full, this method should
+        // never be called if that's the case, but the caller can check for -1
+        // just in case
+        return -1;
+    }
+
     private bool CanPlayCard(int cardID)
     {
         Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
         bool isDCCard =
                 cardToPlay.cardType == CardType.DELAYED ||
                 cardToPlay.cardType == CardType.CONTINUOUS;
-        if((isDCCard && (dccs.Count < 5)) || !isDCCard)
+        if((isDCCard && (dccs.Count < Constants.DCCS_SIZE)) || !isDCCard)
         {
             // have to be sure to only call TrySpendMana() if the Delayed or
             // Continuous card actually has a space in the DCCS, since the
@@ -209,8 +228,9 @@ public class BattleManager : MonoBehaviour
                 case CardType.CONTINUOUS:
                     // same behavior for both card types
                     Debug.Assert(dccs.Count < Constants.DCCS_SIZE);
-                    dccs.Add(new DCCard(cardID, cardToPlay.turnsInPlay));
-                    boardManager.PutCardInDCCS(cardID);
+                    int dccsSlot = AddCardToDCCS(cardID);
+                    Debug.Assert(dccsSlot >= 0);
+                    boardManager.PutCardInDCCS(cardID, cardToPlay.turnsInPlay, dccsSlot);
                     break;
                 
                 case CardType.BASIC:
@@ -366,35 +386,38 @@ public class BattleManager : MonoBehaviour
         // handle cards in the DCCS
         List<int> cardsToRemove = new List<int>();
 
-        for(int i = 0; i < dccs.Count; i++)
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
         {
-            bool cooldownOver = dccs[i].DecrementCounter();
-            Card dccsCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
-            if(dccsCard.cardType == CardType.DELAYED)
+            if(dccs.ContainsKey(i))
             {
-                if(cooldownOver)
+                bool cooldownOver = dccs[i].DecrementCounter();
+                boardManager.UpdateDCCSCount(i, dccs[i].cooldownCounter);
+                Card dccsCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
+                if(dccsCard.cardType == CardType.DELAYED)
+                {
+                    if(cooldownOver)
+                    {
+                        ResolveCardEffects(dccsCard);
+                    }
+                }
+                else if(dccsCard.cardType == CardType.CONTINUOUS)
                 {
                     ResolveCardEffects(dccsCard);
                 }
-            }
-            else if(dccsCard.cardType == CardType.CONTINUOUS)
-            {
-                ResolveCardEffects(dccsCard);
-            }
 
-            if(cooldownOver)
-            {
-                cardsToRemove.Add(i);
+                if(cooldownOver)
+                {
+                    cardsToRemove.Add(i);
+                }
             }
         }
-        // iterate backwards across cardsToRemove, so the indices can be
-        // guaranteed to be correct
-        for(int i = cardsToRemove.Count - 1; i >= 0; i--)
+
+        for(int i = 0; i < cardsToRemove.Count; i++)
         {
             int removedCard = dccs[cardsToRemove[i]].cardID;
-            dccs.RemoveAt(cardsToRemove[i]);
+            dccs.Remove(cardsToRemove[i]);
             discardPile.Add(removedCard);
-            boardManager.RemoveCardFromDCCS(removedCard);
+            boardManager.RemoveCardFromDCCS(cardsToRemove[i]);
         }
 
         //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.

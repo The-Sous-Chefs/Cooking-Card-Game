@@ -18,7 +18,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
 
     // variables the UI needs to keep track of to work
     private List<int> cardsInHand;
-    private List<int> dccs;
+    private Dictionary<int, (int cardID, int countDown)> dccs;
     private int currentCardIndex;
     private int numCardsInDeck;
     private int numCardsInDiscardPile;
@@ -43,10 +43,14 @@ public class TestUIManager : MonoBehaviour, IUIManager
     [SerializeField] private GameObject winMessage;
     [SerializeField] private GameObject loseMessage;
 
-    void Start()
+    // NOTE: Using Awake() instead of Start(), since the BattleManager gets a
+    //       reference to a IUIManager in it's Start() method, and since Awake()
+    //       always runs before Start(), we're guaranteed it will be initialized
+    //       in BattleManager's Start().
+    void Awake()
     {
         cardsInHand = new List<int>();
-        dccs = new List<int>();
+        dccs = new Dictionary<int, (int cardID, int countDown)>();
 
         currentCardIndex = -1;
         SetHandButtonsActive(false);
@@ -55,6 +59,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
 
         chefHPText.text = "HP: " + PlayerStats.Instance.GetHealth();
         chefManaText.text = "Mana: " + PlayerStats.Instance.GetGlobalMana();
+        UpdateDCCSContents();
     }
 
     public void IncrementCurrentCard()
@@ -124,10 +129,18 @@ public class TestUIManager : MonoBehaviour, IUIManager
     private void UpdateDCCSContents()
     {
         string dccsList = "";
-        for(int i = 0; i < dccs.Count; i++)
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
         {
             dccsList += i + ":\n";
-            dccsList += CardDatabase.Instance.GetCardByID(dccs[i]).ToString() + "\n\n";
+            if(dccs.ContainsKey(i))
+            {
+                dccsList += CardDatabase.Instance.GetCardByID(dccs[i].cardID).ToString() + "\n";
+                dccsList += "Countdown: " + dccs[i].countDown + "\n\n";
+            }
+            else
+            {
+                dccsList += "No card in this slot.\n\n";
+            }
         }
         dccsContentsText.text = dccsList;
     }
@@ -211,30 +224,36 @@ public class TestUIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void PutCardInDCCS(int cardID)
+    public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)
     {
-        dccs.Add(cardID);
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        dccs.Add(dccsSlot, (cardID, countDown));
 
         UpdateDCCSContents();
     }
 
-    public void RemoveCardFromDCCS(int cardID)
+    public void RemoveCardFromDCCS(int dccsSlot)
     {
-        Debug.Assert(dccs.Contains(cardID));
-        dccs.Remove(cardID);
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        Debug.Assert(dccs.ContainsKey(dccsSlot));
+        dccs.Remove(dccsSlot);
 
         UpdateDCCSContents();
 
         numCardsInDiscardPile++;
 
         discardPileSizeText.text = numCardsInDiscardPile.ToString();
-        
     }
 
-    public void UpdateDCCSCounts()
+    public void UpdateDCCSCount(int dccsSlot, int newCountDown)
     {
-        // FIXME: Currently, the testing UI has no notion of the countdown on a
-        //        delayed or continuous card!
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        Debug.Assert(dccs.ContainsKey(dccsSlot));
+        int cardID = dccs[dccsSlot].cardID;
+        int oldCountDown = dccs[dccsSlot].countDown;
+        dccs[dccsSlot] = (cardID, oldCountDown - 1);
+
+        UpdateDCCSContents();
     }
 
     public void DeactivateBasicAbilities()
