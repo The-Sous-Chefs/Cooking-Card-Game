@@ -84,6 +84,13 @@ public class TestUIManager : MonoBehaviour, IUIManager
         UpdateSelectedCardText();
     }
 
+    public void pickClickedCurrentCard(int id)
+    {
+        //Debug.Assert(cardsInHand.Contains(id));
+        currentCardIndex = cardsInHand.IndexOf(id);
+        Debug.Log("card id "+id+" selected because of dragging");
+    }
+
     public void PlayCurrentCard()
     {
         Debug.Assert((currentCardIndex >= 0) && (currentCardIndex < cardsInHand.Count));
@@ -92,6 +99,15 @@ public class TestUIManager : MonoBehaviour, IUIManager
             CardPlayedEvent(cardsInHand[currentCardIndex]);
         }
     }
+
+    /*public void PlayCardById(int id)
+    {
+        Debug.Assert(cardsInHand.Contains(id));
+        if (CardPlayedEvent != null)
+        {
+            CardPlayedEvent(id);
+        }
+    }*/
 
     private void MakeMonsterSwitcherTransparent()
     {

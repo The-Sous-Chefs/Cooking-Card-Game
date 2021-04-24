@@ -74,8 +74,9 @@ public class BattleManager : MonoBehaviour
         {
             DrawCard();
         }
+
         // debugging card: put the card would like to test here
-        // hand.Add(0);
+        //hand.Add(1);
 
         //current buff list [0] = stunned or not 
         // [1] = current block rate in %, the actual damage = damage gonna receive * (1 - block rate)
