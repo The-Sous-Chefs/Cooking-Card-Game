@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour,IDropHandler
 {
     public List<Monster> monsterList;
     //public Monster demoMonster = new Monster("demoMonster",1,50,3, 1, new int[4] { 1, 1, 1, 2 });
     public Text hptxt;
     public Text enmName;
-  
+    public Image playedCardUIPlaceHolder;
+    public GameObject battleManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +31,17 @@ public class Enemy : MonoBehaviour
             GetComponent<Image>().color = Color.red;
         } else {
             GetComponent<Image>().color = Color.white;
+        }
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        if (eventData.pointerDrag != null)
+        {
+            Debug.Log("card played!!!!");
+            Destroy(playedCardUIPlaceHolder);
+        //    battleManager.GetComponent<TestUIManager>().pickClickedCurrentCard(4);
+            battleManager.GetComponent<TestUIManager>().PlayCurrentCard();
         }
     }
 }

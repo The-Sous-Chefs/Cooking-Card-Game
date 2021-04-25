@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void CardPlayedDelegate(Card card);
+public delegate void CardPlayedDelegate(int cardID);
+public delegate void PlayerTurnEndedDelgate();
 
 /*
  * This interface can be implemented by both the actual UI for the battle system
@@ -23,6 +24,7 @@ public interface IUIManager
     //-------
 
     event CardPlayedDelegate CardPlayedEvent;
+    event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
     //--------
     // methods
@@ -34,11 +36,13 @@ public interface IUIManager
 
     void DrawCard(int cardID);
 
-    void PlayCard();
+    void RemoveCardFromHand(int cardID, bool discarded);
 
-    void PutCardInDCCS(Card card);
+    void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 
-    void RemoveCardFromDCCS(Card card);
+    void RemoveCardFromDCCS(int dccsSlot);
+
+    void UpdateDCCSCount(int dccsSlot, int newCountDown);
 
     void DeactivateBasicAbilities();
 

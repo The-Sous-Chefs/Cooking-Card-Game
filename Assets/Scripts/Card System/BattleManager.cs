@@ -11,7 +11,7 @@ public class DCCard
     // member variables
     //-----------------
 
-    public int cardID          { get;}
+    public int cardID          { get; }
     public int cooldownCounter { get; private set; }
 
     public DCCard(int cardID, int cooldownCounter)
@@ -33,101 +33,77 @@ public class BattleManager : MonoBehaviour
     public List<int> deck;
     public List<int> discardPile;
     public List<int> hand;
-    public List<DCCard> dccs;
+    public Dictionary<int, DCCard> dccs;
+    [SerializeField] private GameObject boardManagerObject;
+    private IUIManager boardManager;
 
     // TEMPORARY: Just for testing before UI is implemented, should be removed
-    [SerializeField] private int cardID;
     [SerializeField] private Enemy targetEnemy;
-  
-    private Card currentCard;
-    private int enemyPatternIndex;
-    private int cardIndex;
 
-    public Text cardIDText;
-    public Text cardBodyText;
-    public Text handText;
-    public Text handListText;
-    public Text deckSizeText;
-    public Text discardPileSizeText;
-    public Text dccsContentsText;
-    public Image monsterSwitcherImage;
-    public GameObject winMessage;
-    public GameObject loseMessage;
+    private int enemyPatternIndex;
 
     //ported from original tempchef.cs
     public Button chefMove;
     public Text chefStatus;
-    public Text chefHpTxt;
-    public Text gmTxt;
     public int[,] chefBuff;
-    public PlayerStats playerSta;
-
-    //Basic abilities buttons
-    public Button bscAttButton;
-    public Button bscBlcButton;
-    public Button bscRCVButton;
 
     void Start()
     {
+        // get a reference to the boardManager (we have to do it this way, since
+        // interfaces can't be serialized and set in-inspector)
+        boardManager = boardManagerObject.GetComponent<IUIManager>();
+        // doing this here and in OnEnable(), because OnEnable() runs before
+        // Start(), so boardManager will be null at the time; if for some
+        // reason, however BattleManager is disabled, then re-enabled, we'll
+        // want it in OnEnable() as well
+        if(boardManager != null)
+        {
+            boardManager.CardPlayedEvent += PlayCard;
+            boardManager.PlayerTurnEndedEvent += HandlePlayerTurnEnded;
+        }
+
         // initialize the deck, discardPile, hand, and DCCS
         deck = PlayerStats.Instance.GetCollectedCardIDs();
         ShuffleDeck();
         discardPile = new List<int>();
         hand = new List<int>();
-        dccs = new List<DCCard>();
+        dccs = new Dictionary<int, DCCard>();
 
         // draw the player's opening hand
         for(int i = 0; i < Constants.STARTING_HAND_SIZE; i++)
         {
             DrawCard();
         }
+
         // debugging card: put the card would like to test here
-        // hand.Add(0);
-        cardID = hand[0];
-        currentCard = CardDatabase.Instance.GetCardByID(cardID);
+        //hand.Add(1);
 
         //current buff list [0] = stunned or not 
         // [1] = current block rate in %, the actual damage = damage gonna receive * (1 - block rate)
         // the second value means the duration, for example buff{{1,2 }, {0,0}} means the stun will last for 2 turns
         chefBuff = new int[2, 2] { { 0, 0 }, { 0, 0 } };
+    }
 
-        Debug.Log("Card " + currentCard.name + " loaded.");
+    void OnEnable()
+    {
+        if(boardManager != null)
+        {
+            boardManager.CardPlayedEvent += PlayCard;
+            boardManager.PlayerTurnEndedEvent += HandlePlayerTurnEnded;
+        }
+    }
+
+    void OnDisable()
+    {
+        if(boardManager != null)
+        {
+            boardManager.CardPlayedEvent -= PlayCard;
+            boardManager.PlayerTurnEndedEvent -= HandlePlayerTurnEnded;
+        }
     }
 
     void Update()
     {
-        if (hand.Count != 0)
-        {
-            cardID = hand[cardIndex];
-        }
-        else
-        {
-            cardID = 0;
-        }
-        currentCard = CardDatabase.Instance.GetCardByID(cardID);
-        cardIDText.text = "Card ID: " + cardID + ", Name: " + currentCard.name + ", Cost: " + currentCard.cost;
-        cardBodyText.text = currentCard.cardText;
-        handText.text = IntListToString(hand);
-
-        string handList = "";
-        foreach(int id in hand)
-        {
-            handList += CardDatabase.Instance.GetCardByID(id).ToString() + "\n\n";
-        }
-        handListText.text = handList;
-        deckSizeText.text = deck.Count.ToString();
-        discardPileSizeText.text = discardPile.Count.ToString();
-
-        string dccsList = "";
-        foreach(DCCard card in dccs)
-        {
-            dccsList += CardDatabase.Instance.GetCardByID(card.cardID).ToString() +
-                    "\nThe Above Card's Cooldown is: " + card.cooldownCounter + "\n\n";
-        }
-        dccsContentsText.text = dccsList;
-
-        chefHpTxt.text = "Hp :" + PlayerStats.Instance.GetHealth();
-        gmTxt.text = "Global Mana :" + PlayerStats.Instance.GetGlobalMana();
         showChefStunned();
         chefStatus.text = "Current status: Stunned :" + chefBuff[0, 0] + " Turns remaining:" + chefBuff[0, 1] + "\r\n" + "Blocking rate:" + chefBuff[1, 0] + "%" + " Turns remaining: " + chefBuff[1, 1];
     }
@@ -166,6 +142,7 @@ public class BattleManager : MonoBehaviour
             int topCard = deck[lastIndex];
             deck.RemoveAt(lastIndex);
             hand.Add(topCard);
+            boardManager.DrawCard(topCard);
         }
     }
 
@@ -175,19 +152,40 @@ public class BattleManager : MonoBehaviour
         int discardedCard = hand[discardIndex];
         hand.RemoveAt(discardIndex);
         discardPile.Add(discardedCard);
+        boardManager.RemoveCardFromHand(discardedCard, true);
     }
 
-    private bool CanPlayCard()
+    private int AddCardToDCCS(int cardID)
     {
+        Debug.Assert(dccs.Count < Constants.DCCS_SIZE, "Tried to add a card to DCCS when it was full!");
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
+        {
+            if(!dccs.ContainsKey(i))
+            {
+                Card dcCard = CardDatabase.Instance.GetCardByID(cardID);
+                dccs.Add(i, new DCCard(cardID, dcCard.turnsInPlay));
+                return i;
+            }
+        }
+
+        // return -1 to indicate that the DCCS was full, this method should
+        // never be called if that's the case, but the caller can check for -1
+        // just in case
+        return -1;
+    }
+
+    private bool CanPlayCard(int cardID)
+    {
+        Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
         bool isDCCard =
-                currentCard.cardType == CardType.DELAYED ||
-                currentCard.cardType == CardType.CONTINUOUS;
-        if((isDCCard && (dccs.Count < 5)) || !isDCCard)
+                cardToPlay.cardType == CardType.DELAYED ||
+                cardToPlay.cardType == CardType.CONTINUOUS;
+        if((isDCCard && (dccs.Count < Constants.DCCS_SIZE)) || !isDCCard)
         {
             // have to be sure to only call TrySpendMana() if the Delayed or
             // Continuous card actually has a space in the DCCS, since the
             // method has a side effect of spending the mana
-            return PlayerStats.Instance.TrySpendMana(currentCard.cost);
+            return PlayerStats.Instance.TrySpendMana(cardToPlay.cost);
         }
         else
         {
@@ -197,38 +195,47 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void PlayCard()
+    // NOTE: This method used to be public and called directly by a button
+    private void PlayCard(int cardID)
     {
-        Debug.Log("Scanning " + currentCard.name);
+        Debug.Log("REEE");
         // only if remaining mana is affordable and space exists for Delayed or
         // Continuous cards
-        if(CanPlayCard())
+        if(CanPlayCard(cardID))
         {
-            int playedCard = hand[cardIndex];
-            hand.RemoveAt(cardIndex);
+            // if they could play it, CanPlayCard() spent the mana, so update
+            // the UI
+            boardManager.UpdatePlayerMana(
+                    PlayerStats.Instance.GetMaxGlobalMana(),
+                    PlayerStats.Instance.GetGlobalMana()
+            );
 
-            switch(currentCard.cardType)
+            hand.Remove(cardID);
+            boardManager.RemoveCardFromHand(cardID, false);
+
+            Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
+
+            switch(cardToPlay.cardType)
             {
                 case CardType.IMMEDIATE:
-                    ResolveCardEffects();
-                    discardPile.Add(playedCard);
+                    ResolveCardEffects(cardToPlay);
+                    discardPile.Add(cardID);
                     break;
                 
                 case CardType.DELAYED:
                 case CardType.CONTINUOUS:
                     // same behavior for both card types
                     Debug.Assert(dccs.Count < Constants.DCCS_SIZE);
-                    dccs.Add(new DCCard(playedCard, currentCard.turnsInPlay));
+                    int dccsSlot = AddCardToDCCS(cardID);
+                    Debug.Assert(dccsSlot >= 0);
+                    boardManager.PutCardInDCCS(cardID, cardToPlay.turnsInPlay, dccsSlot);
                     break;
                 
                 case CardType.BASIC:
                 default:
-                    Debug.Assert(false, "Unknown card type trying to be played!");
+                    Debug.Assert(false, "Unknown card type (or Basic) trying to be played!");
                     break;
             }
-
-            // need to do range things, will fix later
-            cardIndex = 0;
         }
         else
         {
@@ -236,65 +243,53 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void ResolveCardEffects()
+    private void ResolveCardEffects(Card card)
     {
-        TargettedDamageHandler(targetEnemy);
-        AOEDamageHandler();
-        HealHandler();
-        BlockHandler();
-        StunHandler();
-        ManaRegenHandler(); 
-        // discard before drawing, in case of cards that say discard X, then
-        // draw Y
-        DiscardHandler();
-        DrawHandler();
+        TargettedDamageHandler(card, targetEnemy);
+        AOEDamageHandler(card);
+        StunHandler(card);
+        HealHandler(card);
+        ManaRegenHandler(card);
+        BlockHandler(card);
+        // discard before drawing, in case of cards that say discard X, then draw Y
+        DiscardHandler(card);
+        DrawHandler(card);
     }
 
-    private bool ManaRegenHandler() 
+    private bool TargettedDamageHandler(Card card, Enemy targetEnemy)
     {
-        if (currentCard.manaRegen > 0) 
+        if(card.singleDamage > 0)
         {
-            Debug.Log("Regenerating  " + currentCard.manaRegen + " global mana ");
-            PlayerStats.Instance.AddGlobalMana(currentCard.manaRegen);
-            return true;
-        }
-        return false;
-    }
-
-    private bool TargettedDamageHandler(Enemy targetEnemy)
-    {
-        if(currentCard.singleDamage > 0)
-        {
-            Debug.Log("Dealing " + currentCard.singleDamage + " damage to " + targetEnemy.enmName);
-            targetEnemy.monsterList[0].DecreaseHP(currentCard.singleDamage);
+            Debug.Log("Dealing " + card.singleDamage + " damage to " + targetEnemy.enmName);
+            targetEnemy.monsterList[0].DecreaseHP(card.singleDamage);
             if(targetEnemy.monsterList[0].currentHp <= 0)
             {
-                PlayerWins();
+                boardManager.WinGame();
             }
             return true;
         }
         return false;
     }
 
-    private bool AOEDamageHandler()
+    private bool AOEDamageHandler(Card card)
     {
         // placeholder before we have a multi-enemies battle system
-        if(currentCard.aoeDamage > 0)
+        if(card.aoeDamage > 0)
         {
-            Debug.Log("Dealing " + currentCard.aoeDamage + " damage to all");
-            targetEnemy.monsterList[0].DecreaseHP(currentCard.aoeDamage);
+            Debug.Log("Dealing " + card.aoeDamage + " damage to all");
+            targetEnemy.monsterList[0].DecreaseHP(card.aoeDamage);
             if(targetEnemy.monsterList[0].currentHp <= 0)
             {
-                PlayerWins();
+                boardManager.WinGame();
             }
             return true;
         }
         return false;
     }
 
-    private bool StunHandler()
+    private bool StunHandler(Card card)
     {
-        if(currentCard.stuns)
+        if(card.stuns)
         {
             Debug.Log("Stunning the enemy");
             targetEnemy.monsterList[0].getStunned();
@@ -303,42 +298,61 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
-    private bool HealHandler()
+    private bool HealHandler(Card card)
     {
-        if(currentCard.heal > 0)
+        if(card.heal > 0)
         {
-            Debug.Log("Healing the chef by " + currentCard.heal);
-            PlayerStats.Instance.ApplyHealing(currentCard.heal);
+            Debug.Log("Healing the chef by " + card.heal);
+            PlayerStats.Instance.ApplyHealing(card.heal);
+            boardManager.UpdatePlayerHealth(
+                    PlayerStats.Instance.GetMaxHealth(),
+                    PlayerStats.Instance.GetHealth()
+            );
             return true;
         }
         return false;
     }
 
-    private bool BlockHandler()
+    private bool ManaRegenHandler(Card card) 
     {
-        if(currentCard.blockPercent >0)
+        if (card.manaRegen > 0) 
         {
-            if(currentCard.cardType == CardType.IMMEDIATE )
+            Debug.Log("Regenerating  " + card.manaRegen + " global mana");
+            PlayerStats.Instance.AddGlobalMana(card.manaRegen);
+            boardManager.UpdatePlayerMana(
+                    PlayerStats.Instance.GetMaxGlobalMana(),
+                    PlayerStats.Instance.GetGlobalMana()
+            );
+            return true;
+        }
+        return false;
+    }
+
+    private bool BlockHandler(Card card)
+    {
+        if(card.blockPercent > 0)
+        {
+            if(card.cardType == CardType.IMMEDIATE )
             {
-                Debug.Log("current turn, Blocking vlaue =  " + currentCard.blockPercent);
-                chefBlocking((int)(currentCard.blockPercent* 100),1);
+                Debug.Log("current turn, Blocking vlaue =  " + card.blockPercent);
+                chefBlocking((int)(card.blockPercent * 100),1);
                 return true;
             }
             else
             {
-                Debug.Log( currentCard.turnsInPlay + "turn, Blocking vlaue =  " + currentCard.blockPercent);
-                chefBlocking((int)(currentCard.blockPercent* 100),currentCard.turnsInPlay);
+                Debug.Log(card.turnsInPlay + "turn, Blocking vlaue =  " + card.blockPercent);
+                chefBlocking((int)(card.blockPercent * 100), card.turnsInPlay);
                 return true;
             }
         }
         return false;
     }
 
-    private bool DrawHandler()
+    private bool DrawHandler(Card card)
     {
-        if(currentCard.draw > 0)
+        if(card.draw > 0)
         {
-            for(int i = 0; i < currentCard.draw; i++)
+            for(int i = 0; i < card.draw; i++)
             {
                 DrawCard();
             }
@@ -348,11 +362,11 @@ public class BattleManager : MonoBehaviour
     }
 
     // randomly discard some number of cards 
-    private bool DiscardHandler()
+    private bool DiscardHandler(Card card)
     {
-        if(currentCard.discard > 0)
+        if(card.discard > 0)
         {
-            for(int i = 0; i < currentCard.discard; i++)
+            for(int i = 0; i < card.discard; i++)
             {
                 if(hand.Count > 0)
                 {
@@ -364,62 +378,67 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
-    public void StartPlayerTurn()
+    // NOTE: This method used to be public and called directly by a button
+    private void StartPlayerTurn()
     {
         // handle cards in the DCCS
         List<int> cardsToRemove = new List<int>();
 
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
+        {
+            if(dccs.ContainsKey(i))
+            {
+                bool cooldownOver = dccs[i].DecrementCounter();
+                boardManager.UpdateDCCSCount(i, dccs[i].cooldownCounter);
+                Card dccsCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
+                if(dccsCard.cardType == CardType.DELAYED)
+                {
+                    if(cooldownOver)
+                    {
+                        ResolveCardEffects(dccsCard);
+                    }
+                }
+                else if(dccsCard.cardType == CardType.CONTINUOUS)
+                {
+                    ResolveCardEffects(dccsCard);
+                }
+
+                if(cooldownOver)
+                {
+                    cardsToRemove.Add(i);
+                }
+            }
+        }
+
+        for(int i = 0; i < cardsToRemove.Count; i++)
+        {
+            int removedCard = dccs[cardsToRemove[i]].cardID;
+            dccs.Remove(cardsToRemove[i]);
+            discardPile.Add(removedCard);
+            boardManager.RemoveCardFromDCCS(cardsToRemove[i]);
+        }
+
         //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.
         targetEnemy.monsterList[0].clearEffect();
 
-
-        for(int i = 0; i < dccs.Count; i++)
-        {
-            bool cooldownOver = dccs[i].DecrementCounter();
-            currentCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
-            if(currentCard.cardType == CardType.DELAYED)
-            {
-                if(cooldownOver)
-                {
-                    ResolveCardEffects();
-                }
-            }
-            else if(currentCard.cardType == CardType.CONTINUOUS)
-            {
-                ResolveCardEffects();
-            }
-
-            if(cooldownOver)
-            {
-                cardsToRemove.Add(i);
-            }
-        }
-        // iterate backwards across cardsToRemove, so the indices can be
-        // guaranteed to be correct
-        for(int i = cardsToRemove.Count - 1; i >= 0; i--)
-        {
-            int removedCard = dccs[cardsToRemove[i]].cardID;
-            dccs.RemoveAt(cardsToRemove[i]);
-            discardPile.Add(removedCard);
-        }
-    
+        // reactivate the player's basic abilities for the turn, in case they
+        // used them last turn
+        boardManager.ActivateBasicAbilities();
 
         // the player draws a card every turn (except, technically, the first,
         // since nothing will call StartPlayerTurn() at that point)
         DrawCard();
-        ChangeBAButton(true);
-    }
-    
-    private void MakeTransparent()
-    {
-        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,0);
     }
 
-    public void DoEnemyTurn()
+    private void HandlePlayerTurnEnded()
     {
-        monsterSwitcherImage.GetComponent<Image>().color = new Color(255,255,255,255);
-        Invoke("MakeTransparent", 1);
+        DoEnemyTurn();
+        StartPlayerTurn();
+    }
 
+    // NOTE: This method used to be public and called directly by a button
+    private void DoEnemyTurn()
+    {
         if (!targetEnemy.monsterList[0].stunned)
         {
             int curAction = targetEnemy.monsterList[0].actionpattern[enemyPatternIndex];
@@ -455,9 +474,13 @@ public class BattleManager : MonoBehaviour
         int damagedealed = targetEnemy.monsterList[0].basicAtt * (100 - chefBuff[1,0])/100;
         Debug.Log("percentage:"+ chefBuff[1,0] );
         PlayerStats.Instance.ApplyDamage(damagedealed);
+        boardManager.UpdatePlayerHealth(
+                PlayerStats.Instance.GetMaxHealth(),
+                PlayerStats.Instance.GetHealth()
+        );
         if(PlayerStats.Instance.GetHealthAsPercentage() <= 0.0f)
         {
-            PlayerLoses();
+            boardManager.LoseGame();
         }
     }
 
@@ -470,36 +493,27 @@ public class BattleManager : MonoBehaviour
 
     private void BasicAbility(int id)
     {
-        Card temp = currentCard;
-        currentCard = CardDatabase.Instance.GetCardByID(id);
-        if(CanPlayCard())
+        if(CanPlayCard(id))
         {
-            ResolveCardEffects();
+            // if they could play it, CanPlayCard() spent the mana, so update
+            // the UI
+            boardManager.UpdatePlayerMana(
+                    PlayerStats.Instance.GetMaxGlobalMana(),
+                    PlayerStats.Instance.GetGlobalMana()
+            );
+
+            ResolveCardEffects(CardDatabase.Instance.GetCardByID(id));
+            boardManager.DeactivateBasicAbilities();
         }
-        currentCard = temp;
-        ChangeBAButton(false);
     }
 
-    private void PlayerWins()
-    {
-        winMessage.SetActive(true);
-    }
-
-    private void PlayerLoses()
-    {
-        loseMessage.SetActive(true);
-    }
-
-    // TEMPORARY: This method needs removing
-    public void RestartDemo()
-    {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-    }
-
+    // NOTE: These methods are currently called directly by buttons on screen,
+    //       they should probably be replaced by BasicAbility being called in
+    //       response to some IUIManager event (though that may be overkill, who
+    //       knows)
     public void BasicAttack()
     {
         BasicAbility(1);
-
     }
 
     public void BasicBlock()
@@ -511,66 +525,6 @@ public class BattleManager : MonoBehaviour
     {
         BasicAbility(3);
     }
-
-    private void ChangeBAButton(Boolean state)
-    {
-        bscAttButton.interactable = state;
-        bscBlcButton.interactable = state;
-        bscRCVButton.interactable = state;
-    }
-
-   
-
-
-    public void IncrementCardNumber()
-    {
-        cardIndex++;
-        if(cardIndex == hand.Count)
-        {
-            cardIndex = 0;
-        }
-        // To get rid of OutOfRange
-        if(hand.Count != 0)
-        {
-            cardID = hand[cardIndex]; 
-        }
-        else
-        {
-            cardID = 0;
-        }
-        currentCard = CardDatabase.Instance.GetCardByID(cardID);
-    }
-
-    public void DecrementCardNumber()
-    {
-        cardIndex--;
-        if(cardIndex == -1)
-        {
-            cardIndex = hand.Count - 1;
-        }
-        // To get rid of OutOfRange
-        if(hand.Count != 0)
-        {
-            cardID = hand[cardIndex]; 
-        }
-        else
-        {
-            cardID = 0;
-        }
-        currentCard = CardDatabase.Instance.GetCardByID(cardID);
-    }
-
-    string IntListToString(List<int> list)
-    {
-        string str = "Current Hand: [";
-        foreach(int n in list)
-        {
-            str += n + ", ";
-        }
-        str += "]";
-        return str;
-    }
-
 
     // tempchef
     // easy to read since we don't have much status now
@@ -603,7 +557,7 @@ public class BattleManager : MonoBehaviour
 
     private void showChefStunned()
     {
-        if (chefBuff[0, 0] != 0)
+        if(chefBuff[0, 0] != 0)
         {
             chefMove.interactable = false;
         }
