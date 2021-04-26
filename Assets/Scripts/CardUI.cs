@@ -25,14 +25,14 @@ public class CardUI : MonoBehaviour
 
     void CreateCard(int cardID)
     {
-        this.cardID;
+        this.cardID = cardID;
         Card card = CardDatabase.Instance.GetCardByID(cardID);
         name.text = card.name;
         text.text = card.cardText;
         cost.text = card.cost.ToString();
     }
 
-    public void GetCardID()
+    public int GetCardID()
     {
         return cardID;
     }
