@@ -9,6 +9,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     public GameObject card;
 
     public event CardPlayedDelegate CardPlayedEvent;
+    public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
     // Start is called before the first frame update
     void Start()
@@ -34,16 +35,20 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     }
 
-    public void PlayCard() {
+    public void RemoveCardFromHand(int cardID, bool discarded) {
 
     }
 
-    public void PutCardInDCCS(Card card) {
+    public void PutCardInDCCS(int cardID, int countDown, int dccsSlot) {
 
     }
 
-    public void RemoveCardFromDCCS(Card card) {
+    public void RemoveCardFromDCCS(int dccsSlot) {
 
+    }
+
+    public void UpdateDCCSCount(int dccsSlot, int newCountDown) {
+        
     }
 
     public void DeactivateBasicAbilities() {
