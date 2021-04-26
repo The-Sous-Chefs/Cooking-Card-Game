@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public delegate void CardPlayedDelegate(int cardID);
+public delegate void BasicAbilityUsedDelegate(int abilityID);
 public delegate void PlayerTurnEndedDelgate();
 
 /*
@@ -24,6 +25,7 @@ public interface IUIManager
     //-------
 
     event CardPlayedDelegate CardPlayedEvent;
+    event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
     //--------
@@ -37,6 +39,8 @@ public interface IUIManager
     void DrawCard(int cardID);
 
     void RemoveCardFromHand(int cardID, bool discarded);
+
+    void PutCardInDiscardPile(int cardID);
 
     void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 

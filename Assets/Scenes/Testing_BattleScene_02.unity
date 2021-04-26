@@ -359,13 +359,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: BasicRecover
-        m_Mode: 1
+      - m_Target: {fileID: 185450213}
+        m_MethodName: UseBasicAbility
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -956,7 +956,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hptxt: {fileID: 1192642095}
   enmName: {fileID: 297908864}
-  playedCardUIPlaceHolder: {fileID: 354593529}
+  playedCardUIPlaceHolder: {fileID: 0}
   battleManager: {fileID: 185450210}
 --- !u!1 &216949494
 GameObject:
@@ -1605,7 +1605,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1369284020}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2655,9 +2655,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: BasicAttack
-        m_Mode: 1
+      - m_Target: {fileID: 185450213}
+        m_MethodName: UseBasicAbility
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3417,7 +3417,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1369284020}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -3514,8 +3514,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1354326167}
   - {fileID: 354593527}
+  - {fileID: 1354326167}
   - {fileID: 424154633}
   - {fileID: 1199699589}
   m_Father: {fileID: 1327937460}
@@ -4294,13 +4294,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: BasicBlock
-        m_Mode: 1
+      - m_Target: {fileID: 185450213}
+        m_MethodName: UseBasicAbility
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0

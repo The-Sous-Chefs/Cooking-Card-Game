@@ -59,6 +59,7 @@ public class BattleManager : MonoBehaviour
         if(boardManager != null)
         {
             boardManager.CardPlayedEvent += PlayCard;
+            boardManager.BasicAbilityUsedEvent += PlayCard;
             boardManager.PlayerTurnEndedEvent += HandlePlayerTurnEnded;
         }
 
@@ -89,6 +90,7 @@ public class BattleManager : MonoBehaviour
         if(boardManager != null)
         {
             boardManager.CardPlayedEvent += PlayCard;
+            boardManager.BasicAbilityUsedEvent += PlayCard;
             boardManager.PlayerTurnEndedEvent += HandlePlayerTurnEnded;
         }
     }
@@ -98,6 +100,7 @@ public class BattleManager : MonoBehaviour
         if(boardManager != null)
         {
             boardManager.CardPlayedEvent -= PlayCard;
+            boardManager.BasicAbilityUsedEvent -= PlayCard;
             boardManager.PlayerTurnEndedEvent -= HandlePlayerTurnEnded;
         }
     }
@@ -141,8 +144,16 @@ public class BattleManager : MonoBehaviour
             int lastIndex = deck.Count - 1;
             int topCard = deck[lastIndex];
             deck.RemoveAt(lastIndex);
-            hand.Add(topCard);
-            boardManager.DrawCard(topCard);
+            if(hand.Count < Constants.MAX_HAND_SIZE)
+            {
+                hand.Add(topCard);
+                boardManager.DrawCard(topCard);
+            }
+            else
+            {
+                discardPile.Add(topCard);
+                boardManager.PutCardInDiscardPile(topCard);
+            }
         }
     }
 
@@ -198,7 +209,6 @@ public class BattleManager : MonoBehaviour
     // NOTE: This method used to be public and called directly by a button
     private void PlayCard(int cardID)
     {
-        Debug.Log("REEE");
         // only if remaining mana is affordable and space exists for Delayed or
         // Continuous cards
         if(CanPlayCard(cardID))
@@ -210,14 +220,17 @@ public class BattleManager : MonoBehaviour
                     PlayerStats.Instance.GetGlobalMana()
             );
 
-            hand.Remove(cardID);
-            boardManager.RemoveCardFromHand(cardID, false);
-
             Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
 
             switch(cardToPlay.cardType)
             {
                 case CardType.IMMEDIATE:
+                    hand.Remove(cardID);
+                    // NOTE: It's possible that RemoveCardFromHand() should run
+                    //       last, since it will leave a small window where the
+                    //       card is in the discard pile in the frontend, but
+                    //       not the backend.
+                    boardManager.RemoveCardFromHand(cardID, false);
                     ResolveCardEffects(cardToPlay);
                     discardPile.Add(cardID);
                     break;
@@ -225,6 +238,8 @@ public class BattleManager : MonoBehaviour
                 case CardType.DELAYED:
                 case CardType.CONTINUOUS:
                     // same behavior for both card types
+                    hand.Remove(cardID);
+                    boardManager.RemoveCardFromHand(cardID, false);
                     Debug.Assert(dccs.Count < Constants.DCCS_SIZE);
                     int dccsSlot = AddCardToDCCS(cardID);
                     Debug.Assert(dccsSlot >= 0);
@@ -232,6 +247,13 @@ public class BattleManager : MonoBehaviour
                     break;
                 
                 case CardType.BASIC:
+                    // nothing to do related to the hand, but basic abilities
+                    // are implemented just like any other card in terms of
+                    // effects
+                    ResolveCardEffects(cardToPlay);
+                    boardManager.DeactivateBasicAbilities();
+                    break;
+
                 default:
                     Debug.Assert(false, "Unknown card type (or Basic) trying to be played!");
                     break;
@@ -489,41 +511,6 @@ public class BattleManager : MonoBehaviour
         // turns plus 1 because the counter will decrease once enemy finish its move
         chefGetStunned(targetEnemy.monsterList[0].skilleffect +1);
         Debug.Log(targetEnemy.monsterList[0].name + " spelled its skill." +targetEnemy.monsterList[0].skilleffect);
-    }
-
-    private void BasicAbility(int id)
-    {
-        if(CanPlayCard(id))
-        {
-            // if they could play it, CanPlayCard() spent the mana, so update
-            // the UI
-            boardManager.UpdatePlayerMana(
-                    PlayerStats.Instance.GetMaxGlobalMana(),
-                    PlayerStats.Instance.GetGlobalMana()
-            );
-
-            ResolveCardEffects(CardDatabase.Instance.GetCardByID(id));
-            boardManager.DeactivateBasicAbilities();
-        }
-    }
-
-    // NOTE: These methods are currently called directly by buttons on screen,
-    //       they should probably be replaced by BasicAbility being called in
-    //       response to some IUIManager event (though that may be overkill, who
-    //       knows)
-    public void BasicAttack()
-    {
-        BasicAbility(1);
-    }
-
-    public void BasicBlock()
-    {
-        BasicAbility(2);
-    }
-
-    public void BasicRecover()
-    {
-        BasicAbility(3);
     }
 
     // tempchef

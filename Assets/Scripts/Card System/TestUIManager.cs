@@ -10,6 +10,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
     //-------
 
     public event CardPlayedDelegate CardPlayedEvent;
+    public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
     //-----------------
@@ -97,6 +98,18 @@ public class TestUIManager : MonoBehaviour, IUIManager
         if(CardPlayedEvent != null)
         {
             CardPlayedEvent(cardsInHand[currentCardIndex]);
+        }
+    }
+
+    // NOTE: This method should only be passed the ID of the basic abilities,
+    //       because if it gets any other CardID, it will just result in that
+    //       resolve that card having its effects resolved.
+    public void UseBasicAbility(int abilityID)
+    {
+        Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
+        if(BasicAbilityUsedEvent != null)
+        {
+            BasicAbilityUsedEvent(abilityID);
         }
     }
 
@@ -222,9 +235,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
         Card playedCard = CardDatabase.Instance.GetCardByID(cardID);
         if(discarded || (playedCard.cardType == CardType.IMMEDIATE))
         {
-            numCardsInDiscardPile++;
-
-            discardPileSizeText.text = numCardsInDiscardPile.ToString();
+            PutCardInDiscardPile(cardID);
         }
 
         if(currentCardIndex >= cardsInHand.Count)
@@ -247,6 +258,12 @@ public class TestUIManager : MonoBehaviour, IUIManager
         {
             UpdateSelectedCardText();
         }
+    }
+
+    public void PutCardInDiscardPile(int cardID)
+    {
+        numCardsInDiscardPile++;
+        discardPileSizeText.text = numCardsInDiscardPile.ToString();
     }
 
     public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)
