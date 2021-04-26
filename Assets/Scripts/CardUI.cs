@@ -9,6 +9,7 @@ public class CardUI : MonoBehaviour
     [SerializeField] private Text cost;
     [SerializeField] private Text text;
     [SerializeField] private Image cardDisplay;
+    private int cardID;
 
     // Start is called before the first frame update
     void Start()
@@ -22,9 +23,17 @@ public class CardUI : MonoBehaviour
         
     }
 
-    void createCard(Card c) {
-        name.text = c.name;
-        text.text = c.cardText;
-        cost.text = c.cost.ToString();
+    void CreateCard(int cardID)
+    {
+        this.cardID;
+        Card card = CardDatabase.Instance.GetCardByID(cardID);
+        name.text = card.name;
+        text.text = card.cardText;
+        cost.text = card.cost.ToString();
+    }
+
+    public void GetCardID()
+    {
+        return cardID;
     }
 }

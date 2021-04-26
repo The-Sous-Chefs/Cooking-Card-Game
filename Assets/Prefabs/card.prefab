@@ -247,10 +247,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ade12c67712a400cbf56b9cc95aefb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: Food
-  cardName: {fileID: 7177350909081133558}
-  cardCost: {fileID: 1638426687593256923}
-  cardText: {fileID: 5020363103722298909}
+  name: {fileID: 7177350909081133558}
+  cost: {fileID: 1638426687593256923}
+  text: {fileID: 5020363103722298909}
+  cardDisplay: {fileID: 5924204784984621251}
 --- !u!1 &2695378380653443404
 GameObject:
   m_ObjectHideFlags: 0
