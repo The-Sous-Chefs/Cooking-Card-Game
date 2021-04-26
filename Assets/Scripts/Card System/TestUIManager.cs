@@ -23,11 +23,12 @@ public class TestUIManager : MonoBehaviour, IUIManager
     private int currentCardIndex;
     private int numCardsInDeck;
     private int numCardsInDiscardPile;
+    private bool playerStunned;
 
     // variables used only to display information to the player
     [SerializeField] private Text chefHPText;
     [SerializeField] private Text chefManaText;
-    [SerializeField] private Text chefStatusText;
+    [SerializeField] private Text chefBlockText;
     [SerializeField] private Text handListText;
     [SerializeField] private Text deckSizeText;
     [SerializeField] private Text discardPileSizeText;
@@ -41,6 +42,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
     [SerializeField] private Button basicBlockButton;
     [SerializeField] private Button basicManaRefreshButton;
 
+    [SerializeField] private Image stunIndicatorImage;
     [SerializeField] private Image monsterSwitcherImage;
 
     [SerializeField] private GameObject winMessage;
@@ -59,9 +61,14 @@ public class TestUIManager : MonoBehaviour, IUIManager
         SetHandButtonsActive(false);
         numCardsInDeck = PlayerStats.Instance.GetCollectedCardIDs().Count;
         numCardsInDiscardPile = 0;
+        playerStunned = false;
 
         chefHPText.text = "HP: " + PlayerStats.Instance.GetHealth();
         chefManaText.text = "Mana: " + PlayerStats.Instance.GetGlobalMana();
+        chefBlockText.text = "Blocking 0% of damage from enemies.";
+        stunIndicatorImage.enabled = false;
+        deckSizeText.text = "0";
+        discardPileSizeText.text = "0";
         UpdateDCCSContents();
     }
 
@@ -185,11 +192,11 @@ public class TestUIManager : MonoBehaviour, IUIManager
 
     private void SetHandButtonsActive(bool enabled)
     {
-        incrementButton.interactable = enabled;
-        decrementButton.interactable = enabled;
-        playButton.interactable = enabled;
+        incrementButton.interactable = playerStunned ? false : enabled;
+        decrementButton.interactable = playerStunned ? false : enabled;
+        playButton.interactable = playerStunned ? false : enabled;
         
-        if(enabled)
+        if(!playerStunned && enabled)
         {
             UpdateSelectedCardText();
         }
@@ -207,6 +214,21 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void UpdatePlayerMana(int maxMana, int currentMana)
     {
         chefManaText.text = "Mana: " + currentMana;
+    }
+
+    public void UpdatePlayerBlockPercent(float blockPercent)
+    {
+        chefBlockText.text = "Blocking " + (blockPercent * 100) + "% of damage from enemies.";
+    }
+
+    public void UpdatePlayerStunStatus(bool stunned)
+    {
+        playerStunned = stunned;
+        if(currentCardIndex != -1)
+        {
+            SetHandButtonsActive(!playerStunned);
+        }
+        stunIndicatorImage.enabled = playerStunned;
     }
 
     public void DrawCard(int cardID)
@@ -235,7 +257,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
         Card playedCard = CardDatabase.Instance.GetCardByID(cardID);
         if(discarded || (playedCard.cardType == CardType.IMMEDIATE))
         {
-            PutCardInDiscardPile(cardID);
+            PutCardInDiscardPile(cardID, false);
         }
 
         if(currentCardIndex >= cardsInHand.Count)
@@ -260,10 +282,15 @@ public class TestUIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void PutCardInDiscardPile(int cardID)
+    public void PutCardInDiscardPile(int cardID, bool fromDeck)
     {
         numCardsInDiscardPile++;
         discardPileSizeText.text = numCardsInDiscardPile.ToString();
+        if(fromDeck)
+        {
+            numCardsInDeck--;
+            deckSizeText.text = numCardsInDeck.ToString();
+        }
     }
 
     public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)

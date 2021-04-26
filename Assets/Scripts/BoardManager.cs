@@ -32,6 +32,14 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     }
 
+    public void UpdatePlayerBlockPercent(float blockPercent) {
+
+    }
+
+    public void UpdatePlayerStunStatus(bool stunned) {
+
+    }
+
     public void DrawCard(int cardID) {
 
     }
@@ -40,7 +48,7 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     }
 
-    public void PutCardInDiscardPile(int cardID) {
+    public void PutCardInDiscardPile(int cardID, bool fromDeck) {
 
     }
 

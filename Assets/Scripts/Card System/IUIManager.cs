@@ -36,11 +36,15 @@ public interface IUIManager
 
     void UpdatePlayerMana(int maxMana, int currentMana);
 
+    void UpdatePlayerBlockPercent(float blockPercent);
+
+    void UpdatePlayerStunStatus(bool stunned);
+
     void DrawCard(int cardID);
 
     void RemoveCardFromHand(int cardID, bool discarded);
 
-    void PutCardInDiscardPile(int cardID);
+    void PutCardInDiscardPile(int cardID, bool fromDeck);
 
     void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 
