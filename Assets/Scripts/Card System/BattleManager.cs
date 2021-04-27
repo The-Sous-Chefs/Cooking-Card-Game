@@ -35,7 +35,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private List<int> discardPile;
     [SerializeField] private List<int> hand;
     private Dictionary<int, DCCard> dccs;
-    private bool basicAbilityUsed;
+    private bool cantUseBasicAbility;
     private float blockPercent;
     private int stunnedTurns;
     [SerializeField] private GameObject boardManagerObject;
@@ -83,9 +83,9 @@ public class BattleManager : MonoBehaviour
         // hand.Add(testCardID);
         // boardManager.PutCardInHand(testCardID)
 
-        // initialize basicAbilityUsed to false, block percentage to 0%,
+        // initialize cantUseBasicAbility to false, block percentage to 0%,
         // and stunned status to not stunned
-        basicAbilityUsed = false;
+        cantUseBasicAbility = false;
         blockPercent = 0.0f;
         stunnedTurns = 0;
 
@@ -203,12 +203,12 @@ public class BattleManager : MonoBehaviour
                 cardToPlay.cardType == CardType.DELAYED ||
                 cardToPlay.cardType == CardType.CONTINUOUS;
         bool isBasicAbility = cardToPlay.cardType == CardType.BASIC;
-        if((isDCCard && (dccs.Count >= Constants.DCCS_SIZE)) ||
-                (!isBasicAbility && (stunnedTurns > 0)))
+        if((isDCCard && (dccs.Count >= Constants.DCCS_SIZE)) || (stunnedTurns > 0))
         {
-            // we only want to return false without checking cost if the card is
-            // 1) Delayed or Continuous and the DCCS doesn't have space, or
-            // 2) not a Basic ability and th eplayer is stunned for the turn
+            // we only want to return false without checking cost if
+            // 1) the card is Delayed or Continuous and the DCCS doesn't have 
+            //    space, or
+            // 2) the player is stunned for the turn
             Debug.Log("Can't play " + cardToPlay + " for a reason other than mana");
             return false;
         }
@@ -257,13 +257,13 @@ public class BattleManager : MonoBehaviour
                     break;
                 
                 case CardType.BASIC:
-                    if(!basicAbilityUsed)
+                    if(!cantUseBasicAbility)
                     {
                         // nothing to do related to the hand, but basic abilities
                         // are implemented just like any other card in terms of
                         // effects
                         ResolveCardEffects(cardToPlay);
-                        basicAbilityUsed = true;
+                        cantUseBasicAbility = true;
                         boardManager.DeactivateBasicAbilities();
                     }
                     break;
@@ -411,22 +411,23 @@ public class BattleManager : MonoBehaviour
         // NOTE: update any player status first, since DCCS may affect it and we
         //       don't want to undo that stuff
 
-        // reactivate the player's basic abilities for the turn
-        if(basicAbilityUsed)
-        {
-            basicAbilityUsed = false;
-            boardManager.ActivateBasicAbilities();
-        }
-
         // reset block percentage
         blockPercent = 0.0f;
         boardManager.UpdatePlayerBlockPercent(blockPercent);
 
-        // handle being stunned (EndPlayerTurn() will handle decrementing it)
+        // reactivate the player's basic abilities for the turn
+        if(cantUseBasicAbility && (stunnedTurns == 0))
+        {
+            // basic abilities should remain disabled if the player is stunned
+            cantUseBasicAbility = false;
+            boardManager.ActivateBasicAbilities();
+        }
+
+        // handle becoming un-stunned (EndPlayerTurn() will handle decrementing it)
         if(stunnedTurns == 0)
         {
-            // NOTE: This will be called every turn the player isn't stunned,
-            //       not just the first turn they stop being stunned.
+            // NOTE: This will happen every turn the player isn't stunned, not
+            //       just the first turn they stop being stunned.
             boardManager.UpdatePlayerStunStatus(false);
         }
 
@@ -564,6 +565,10 @@ public class BattleManager : MonoBehaviour
         // add turns, just in case stuns get applied one after another
         stunnedTurns += targetEnemy.monsterList[0].skilleffect;
         boardManager.UpdatePlayerStunStatus(true);
+        // being stunned prevents the use of basic abilities as well,
+        // StartPlayerTurn() will re-enable them when they stop being stunned
+        cantUseBasicAbility = true;
+        boardManager.DeactivateBasicAbilities();
     }
 }
 
