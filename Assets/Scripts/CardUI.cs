@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CardUI : MonoBehaviour
 {
-    [SerializeField] private Text name;
+    [SerializeField] private Text cardName;
     [SerializeField] private Text cost;
     [SerializeField] private Text text;
     [SerializeField] private Image cardDisplay;
@@ -27,7 +27,7 @@ public class CardUI : MonoBehaviour
     {
         this.cardID = cardID;
         Card card = CardDatabase.Instance.GetCardByID(cardID);
-        name.text = card.name;
+        cardName.text = card.name;
         text.text = card.cardText;
         cost.text = card.cost.ToString();
     }
