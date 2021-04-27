@@ -77,9 +77,9 @@ public class TestUIManager : MonoBehaviour, IUIManager
         chefHPText.text = "HP: #";
         chefManaText.text = "Mana: #";
         chefBlockText.text = "Blocking 0% of damage from enemies.";
-        stunIndicatorImage.enabled = false;
         deckSizeText.text = numCardsInDeck.ToString();
         discardPileSizeText.text = numCardsInDiscardPile.ToString();
+        stunIndicatorImage.enabled = false;
         UpdateDCCSContents();
     }
 
