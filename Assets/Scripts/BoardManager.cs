@@ -6,27 +6,21 @@ using UnityEngine.SceneManagement;
 
 public class BoardManager : MonoBehaviour, IUIManager
 {
-<<<<<<< HEAD
     public List<int> deck;
     public List<int> discardPile;
-    public List<Card> hand;
-    public GameObject card;
     [SerializeField] private GameObject boardManagerObject;
     private IUIManager boardManager;
     public HealthBar playerHealthBar;
     public HealthBar enemyHealthBar;
     public ManaBar playerManaBar;
-=======
     //-------
     // events
     //-------
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
 
     public event CardPlayedDelegate CardPlayedEvent;
     public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
-<<<<<<< HEAD
     // Start is called before the first frame update
     void Start()
     { 
@@ -78,8 +72,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     // }
 
     // Update is called once per frame
-    void Update()
-=======
+    void Update() { }
     //-----------------
     // member variables
     //-----------------
@@ -148,7 +141,6 @@ public class BoardManager : MonoBehaviour, IUIManager
     //       because if it gets any other CardID, it will just result in that
     //       resolve that card having its effects resolved.
     public void UseBasicAbility(int abilityID)
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
         if(BasicAbilityUsedEvent != null)
@@ -157,16 +149,18 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
-<<<<<<< HEAD
     public void UpdatePlayerHealth(int maxHealth, int currentHealth) {
         playerHealthBar.setMaxHealth(maxHealth);
         playerHealthBar.setHealth(currentHealth);
+        chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
     }
 
     public void UpdatePlayerMana(int maxMana, int currentMana) {
         playerManaBar.setMaxMana(maxMana);
         playerManaBar.setMana(currentMana);
-=======
+        chefManaText.text = "Mana: " + currentMana + " / " + maxMana;
+    }
+
     public void EndPlayerTurn()
     {
         if(PlayerTurnEndedEvent != null)
@@ -186,18 +180,6 @@ public class BoardManager : MonoBehaviour, IUIManager
     //-------------------
     // IUIManager methods
     //-------------------
-
-    public void UpdatePlayerHealth(int maxHealth, int currentHealth)
-    {
-        chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
-    }
-
-    public void UpdatePlayerMana(int maxMana, int currentMana)
-    {
-        chefManaText.text = "Mana: " + currentMana + " / " + maxMana;
-    }
-
     public void UpdatePlayerBlockPercent(float blockPercent)
     {
         chefBlockText.text = "Blocking " + (blockPercent * 100) + "% of damage";
@@ -250,15 +232,10 @@ public class BoardManager : MonoBehaviour, IUIManager
         discardPileCountText.text = numCardsInDiscardPile.ToString();
     }
 
-<<<<<<< HEAD
-    public void UpdateDCCSCount(int dccsSlot, int newCountDown) {
-
-=======
     public void RemoveCardFromDiscardPile(int cardID)
     {
         numCardsInDiscardPile--;
         discardPileCountText.text = numCardsInDiscardPile.ToString();
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
     }
 
     public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)
@@ -341,11 +318,12 @@ public class BoardManager : MonoBehaviour, IUIManager
         basicManaRefreshButton.interactable = true;
     }
 
-<<<<<<< HEAD
     public void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth) {
         enemyHealthBar.setMaxHealth(maxHealth);
         enemyHealthBar.setHealth(currentHealth);
-=======
+        enemy.SetHPText(maxHealth, currentHealth);
+    }
+
     public void DeactivateBasicAbilities()
     {
         basicAttackButton.interactable = false;
@@ -357,17 +335,11 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         enemy.SetNameText(monster.name);
         enemy.SetHPText(monster.maxHP, monster.currentHP);
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
     }
 
     public void RemoveEnemy(int monsterID)
     {
         // do nothing, since there's only one sort of hard-coded enemy at the moment
-    }
-
-    public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth)
-    {
-        enemy.SetHPText(maxHealth, currentHealth);
     }
 
     public void UpdateEnemyStunStatus(int monsterID, bool stunned)
