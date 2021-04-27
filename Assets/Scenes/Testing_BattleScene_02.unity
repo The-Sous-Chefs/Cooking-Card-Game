@@ -956,8 +956,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hptxt: {fileID: 1192642095}
   enmName: {fileID: 297908864}
-  playedCardUIPlaceHolder: {fileID: 354593529}
-  battleManager: {fileID: 185450210}
+  playedCardUIPlaceHolder: {fileID: 0}
+  battleManager: {fileID: 0}
 --- !u!1 &216949494
 GameObject:
   m_ObjectHideFlags: 0

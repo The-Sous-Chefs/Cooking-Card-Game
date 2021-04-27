@@ -7,6 +7,9 @@ public class BoardManager : MonoBehaviour, IUIManager
 {
     public List<Card> hand;
     public GameObject card;
+    public HealthBar playerHealthBar;
+    public HealthBar enemyHealthBar;
+    public ManaBar playerManaBar;
 
     public event CardPlayedDelegate CardPlayedEvent;
     public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
@@ -24,7 +27,8 @@ public class BoardManager : MonoBehaviour, IUIManager
     }
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth) {
-
+        playerHealthBar.setMaxHealth(maxHealth);
+        playerHealthBar.setHealth(currentHealth);
     }
 
     public void UpdatePlayerMana(int maxMana, int currentMana) {
@@ -48,7 +52,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     }
 
     public void UpdateDCCSCount(int dccsSlot, int newCountDown) {
-        
+
     }
 
     public void DeactivateBasicAbilities() {
