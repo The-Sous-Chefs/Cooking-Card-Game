@@ -42,6 +42,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private GameObject loseMessage;
 
     [SerializeField] private Transform handContainer;
+    [SerializeField] private Canvas canvas;
 
     void Awake()
     {
@@ -114,7 +115,9 @@ public class BoardManager : MonoBehaviour, IUIManager
     // GameObject cardObject = Instantiate(card, handContainer);
     public void PutCardInHand(int cardId)
     {
-        //
+        GameObject newCardInUI = Instantiate(card, handContainer);
+        newCardInUI.GetComponent<DragDrop>().canvas = canvas;
+        newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
     }
 
     public void RemoveCardFromHand(int cardID)
@@ -203,5 +206,10 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void LoseGame()
     {
         loseMessage.SetActive(true);
+    }
+
+    public void playCardByID(int cardId)
+    {
+        CardPlayedEvent(cardId);
     }
 }

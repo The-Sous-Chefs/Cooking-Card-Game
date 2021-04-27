@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TestEnemy : MonoBehaviour
+public class TestEnemy : MonoBehaviour, IDropHandler
 {
     [SerializeField] private Text nameText;
     [SerializeField] private Text hpText;
     [SerializeField] private Image enemyImage;
+    [SerializeField] private GameObject boardManageGameObject;
 
     public void SetNameText(string name)
     {
@@ -30,5 +32,11 @@ public class TestEnemy : MonoBehaviour
         {
             enemyImage.color = Color.white;
         }
+    }
+    public void OnDrop(PointerEventData eventData)
+    {
+        GameObject tempCard = GameObject.Find("SelectedCard");
+        boardManageGameObject.GetComponent<BoardManager>().playCardByID(tempCard.transform.GetChild(0).GetComponent<CardUI>().cardID);
+        //Destroy(tempCard);
     }
 }

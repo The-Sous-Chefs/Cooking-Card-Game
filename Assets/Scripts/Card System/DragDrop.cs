@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IEndDragHandler,IDragHandler, IDropHandler,IPointerEnterHandler,IPointerExitHandler
 {
-    [SerializeField] private Canvas canvas;
+    public Canvas canvas;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
     private Vector2 originPos;
@@ -20,14 +20,25 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-     //   if (wedonthavecardselected)
-     //   Now it will still trigger while we are dragging another card
-        rectTransform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+        //   if (wedonthavecardselected)
+        //   Now it will still trigger while we are dragging another card
+        if (GameObject.Find("SelectedCard").transform.childCount == 0)
+        {
+            rectTransform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+            //rectTransform.anchoredPosition += new Vector2(-80, 0);
+            rectTransform.anchoredPosition += new Vector2(0, 100);
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        rectTransform.localScale = new Vector3(1f, 1f, 1f);
+        if (GameObject.Find("SelectedCard").transform.childCount == 0)
+        {   
+            //rectTransform.anchoredPosition -= new Vector2(-80, 0);
+            rectTransform.anchoredPosition -= new Vector2(0, 100);
+            rectTransform.localScale = new Vector3(1f, 1f, 1f);
+        }
+
     }
 
 
@@ -43,13 +54,14 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
     public void OnDrag(PointerEventData eventData)
     {
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
-        rectTransform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+        rectTransform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
         transform.SetParent(GameObject.Find("SelectedCard").transform);
 
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+
         rectTransform.localScale = new Vector3(1f, 1f, 1f);
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
