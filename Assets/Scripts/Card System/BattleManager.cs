@@ -64,6 +64,10 @@ public class BattleManager : MonoBehaviour
 
         // initialize the deck, discardPile, hand, and DCCS
         deck = PlayerStats.Instance.GetCollectedCardIDs();
+        foreach(int card in deck)
+        {
+            boardManager.PutCardInDeck(card);
+        }
         ShuffleDeck();
         discardPile = new List<int>();
         hand = new List<int>();
@@ -75,7 +79,9 @@ public class BattleManager : MonoBehaviour
             DrawCard();
         }
         // debugging card: put the card would like to test here
-        // hand.Add(1);
+        // int testCardID = 1;
+        // hand.Add(testCardID);
+        // boardManager.PutCardInHand(testCardID)
 
         // initialize basicAbilityUsed to false, block percentage to 0%,
         // and stunned status to not stunned
@@ -132,26 +138,32 @@ public class BattleManager : MonoBehaviour
         {
             // shuffle the discard pile into the deck
             deck = new List<int>(discardPile);
-            ShuffleDeck();
             discardPile = new List<int>();
+            foreach(int card in deck)
+            {
+                boardManager.RemoveCardFromDiscardPile(card);
+                boardManager.PutCardInDeck(card);
+            }
+            ShuffleDeck();
         }
 
-        if(deck.Count != 0)
+        if(deck.Count > 0)
         {
             // if the discard pile was empty, it's still possible that the deck
             // is empty at this point, so the if statement is needed
             int lastIndex = deck.Count - 1;
             int topCard = deck[lastIndex];
             deck.RemoveAt(lastIndex);
+            boardManager.RemoveCardFromDeck(topCard);
             if(hand.Count < Constants.MAX_HAND_SIZE)
             {
                 hand.Add(topCard);
-                boardManager.DrawCard(topCard);
+                boardManager.PutCardInHand(topCard);
             }
             else
             {
                 discardPile.Add(topCard);
-                boardManager.PutCardInDiscardPile(topCard, true);
+                boardManager.PutCardInDiscardPile(topCard);
             }
         }
     }
@@ -161,27 +173,27 @@ public class BattleManager : MonoBehaviour
         int discardIndex = UnityEngine.Random.Range(0, hand.Count);
         int discardedCard = hand[discardIndex];
         hand.RemoveAt(discardIndex);
+        boardManager.RemoveCardFromHand(discardedCard);
         discardPile.Add(discardedCard);
-        boardManager.RemoveCardFromHand(discardedCard, true);
+        boardManager.PutCardInDiscardPile(discardedCard);
     }
 
-    private int AddCardToDCCS(int cardID)
+    private void AddCardToDCCS(int cardID)
     {
         Debug.Assert(dccs.Count < Constants.DCCS_SIZE, "Tried to add a card to DCCS when it was full!");
-        for(int i = 0; i < Constants.DCCS_SIZE; i++)
+        int slot = 0;
+        bool foundSlot = false;
+        while((slot < Constants.DCCS_SIZE) && !foundSlot)
         {
-            if(!dccs.ContainsKey(i))
+            if(!dccs.ContainsKey(slot))
             {
+                foundSlot = true;
                 Card dcCard = CardDatabase.Instance.GetCardByID(cardID);
-                dccs.Add(i, new DCCard(cardID, dcCard.turnsInPlay));
-                return i;
+                dccs.Add(slot, new DCCard(cardID, dcCard.turnsInPlay));
+                boardManager.PutCardInDCCS(cardID, dcCard.turnsInPlay, slot);
             }
+            slot++;
         }
-
-        // return -1 to indicate that the DCCS was full, this method should
-        // never be called if that's the case, but the caller can check for -1
-        // just in case
-        return -1;
     }
 
     private bool CanPlayCard(int cardID)
@@ -208,12 +220,6 @@ public class BattleManager : MonoBehaviour
             // NOTE: That should maybe be fixed.
             return PlayerStats.Instance.TrySpendMana(cardToPlay.cost);
         }
-
-        /*
-         * We only want to enter the "return false" block if 1) the card is a
-         * Delayed or Continuous card and there isn't space for it in the DCCS,
-         * or 2) the card isn't a basic ability and the player is stunned
-         */
     }
 
     // NOTE: This method used to be public and called directly by a button
@@ -236,24 +242,18 @@ public class BattleManager : MonoBehaviour
             {
                 case CardType.IMMEDIATE:
                     hand.Remove(cardID);
-                    // NOTE: It's possible that RemoveCardFromHand() should run
-                    //       last, since it will leave a small window where the
-                    //       card is in the discard pile in the frontend, but
-                    //       not the backend.
-                    boardManager.RemoveCardFromHand(cardID, false);
+                    boardManager.RemoveCardFromHand(cardID);
                     ResolveCardEffects(cardToPlay);
                     discardPile.Add(cardID);
+                    boardManager.PutCardInDiscardPile(cardID);
                     break;
                 
                 case CardType.DELAYED:
                 case CardType.CONTINUOUS:
                     // same behavior for both card types
                     hand.Remove(cardID);
-                    boardManager.RemoveCardFromHand(cardID, false);
-                    Debug.Assert(dccs.Count < Constants.DCCS_SIZE);
-                    int dccsSlot = AddCardToDCCS(cardID);
-                    Debug.Assert(dccsSlot >= 0);
-                    boardManager.PutCardInDCCS(cardID, cardToPlay.turnsInPlay, dccsSlot);
+                    boardManager.RemoveCardFromHand(cardID);
+                    AddCardToDCCS(cardID);
                     break;
                 
                 case CardType.BASIC:
@@ -440,6 +440,10 @@ public class BattleManager : MonoBehaviour
                 bool cooldownOver = dccs[i].DecrementCounter();
                 boardManager.UpdateDCCSCount(i, dccs[i].cooldownCounter);
                 Card dccsCard = CardDatabase.Instance.GetCardByID(dccs[i].cardID);
+                Debug.Assert(
+                        (dccsCard.cardType == CardType.DELAYED) ||
+                        (dccsCard.cardType == CardType.CONTINUOUS)
+                );
                 if(dccsCard.cardType == CardType.DELAYED)
                 {
                     if(cooldownOver)
@@ -463,8 +467,9 @@ public class BattleManager : MonoBehaviour
         {
             int removedCard = dccs[cardsToRemove[i]].cardID;
             dccs.Remove(cardsToRemove[i]);
-            discardPile.Add(removedCard);
             boardManager.RemoveCardFromDCCS(cardsToRemove[i]);
+            discardPile.Add(removedCard);
+            boardManager.PutCardInDiscardPile(removedCard);
         }
 
         //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.

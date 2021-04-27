@@ -59,7 +59,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
 
         currentCardIndex = -1;
         SetHandButtonsActive(false);
-        numCardsInDeck = PlayerStats.Instance.GetCollectedCardIDs().Count;
+        numCardsInDeck = 0;
         numCardsInDiscardPile = 0;
         playerStunned = false;
 
@@ -208,12 +208,12 @@ public class TestUIManager : MonoBehaviour, IUIManager
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
-        chefHPText.text = "HP: " + currentHealth;
+        chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
     }
 
     public void UpdatePlayerMana(int maxMana, int currentMana)
     {
-        chefManaText.text = "Mana: " + currentMana;
+        chefManaText.text = "Mana: " + currentMana + " / " + maxMana;
     }
 
     public void UpdatePlayerBlockPercent(float blockPercent)
@@ -231,34 +231,30 @@ public class TestUIManager : MonoBehaviour, IUIManager
         stunIndicatorImage.enabled = playerStunned;
     }
 
-    public void DrawCard(int cardID)
+    // add a card to the player's hand and update the visuals accordingly
+    public void PutCardInHand(int cardID)
     {
         cardsInHand.Add(cardID);
-        numCardsInDeck--;
 
         UpdateHandList();
-
-        deckSizeText.text = numCardsInDeck.ToString();
 
         if(currentCardIndex == -1)
         {
             currentCardIndex = 0;
             SetHandButtonsActive(true);
+            
+            // FIXME: Shouldn't this be called here!?
+            // UpdateSelectedCardText();
         }
     }
 
-    public void RemoveCardFromHand(int cardID, bool discarded)
+    // remove the card from the player's hand and update the visuals accordingly
+    public void RemoveCardFromHand(int cardID)
     {
         Debug.Assert(cardsInHand.Contains(cardID));
         cardsInHand.Remove(cardID);
 
         UpdateHandList();
-
-        Card playedCard = CardDatabase.Instance.GetCardByID(cardID);
-        if(discarded || (playedCard.cardType == CardType.IMMEDIATE))
-        {
-            PutCardInDiscardPile(cardID, false);
-        }
 
         if(currentCardIndex >= cardsInHand.Count)
         {
@@ -282,15 +278,29 @@ public class TestUIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void PutCardInDiscardPile(int cardID, bool fromDeck)
+    // add a card to the players deck and update the visuals accordingly
+    public void PutCardInDeck(int cardID)
+    {
+        numCardsInDeck++;
+        deckSizeText.text = numCardsInDeck.ToString();
+    }
+
+    public void RemoveCardFromDeck(int cardID)
+    {
+        numCardsInDeck--;
+        deckSizeText.text = numCardsInDeck.ToString();
+    }
+
+    public void PutCardInDiscardPile(int cardID)
     {
         numCardsInDiscardPile++;
         discardPileSizeText.text = numCardsInDiscardPile.ToString();
-        if(fromDeck)
-        {
-            numCardsInDeck--;
-            deckSizeText.text = numCardsInDeck.ToString();
-        }
+    }
+
+    public void RemoveCardFromDiscardPile(int cardID)
+    {
+        numCardsInDiscardPile--;
+        discardPileSizeText.text = numCardsInDiscardPile.ToString();
     }
 
     public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)
@@ -308,28 +318,15 @@ public class TestUIManager : MonoBehaviour, IUIManager
         dccs.Remove(dccsSlot);
 
         UpdateDCCSContents();
-
-        numCardsInDiscardPile++;
-
-        discardPileSizeText.text = numCardsInDiscardPile.ToString();
     }
 
     public void UpdateDCCSCount(int dccsSlot, int newCountDown)
     {
         Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
         Debug.Assert(dccs.ContainsKey(dccsSlot));
-        int cardID = dccs[dccsSlot].cardID;
-        int oldCountDown = dccs[dccsSlot].countDown;
-        dccs[dccsSlot] = (cardID, oldCountDown - 1);
+        dccs[dccsSlot] = (dccs[dccsSlot].cardID, dccs[dccsSlot].countDown - 1);
 
         UpdateDCCSContents();
-    }
-
-    public void DeactivateBasicAbilities()
-    {
-        basicAttackButton.interactable = false;
-        basicBlockButton.interactable = false;
-        basicManaRefreshButton.interactable = false;
     }
 
     public void ActivateBasicAbilities()
@@ -337,6 +334,13 @@ public class TestUIManager : MonoBehaviour, IUIManager
         basicAttackButton.interactable = true;
         basicBlockButton.interactable = true;
         basicManaRefreshButton.interactable = true;
+    }
+
+    public void DeactivateBasicAbilities()
+    {
+        basicAttackButton.interactable = false;
+        basicBlockButton.interactable = false;
+        basicManaRefreshButton.interactable = false;
     }
 
     public void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth)

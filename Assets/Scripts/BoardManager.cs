@@ -40,15 +40,27 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     }
 
-    public void DrawCard(int cardID) {
+    public void PutCardInHand(int cardId) {
 
     }
 
-    public void RemoveCardFromHand(int cardID, bool discarded) {
+    public void RemoveCardFromHand(int cardID) {
 
     }
 
-    public void PutCardInDiscardPile(int cardID, bool fromDeck) {
+    public void PutCardInDeck(int cardID) {
+
+    }
+
+    public void RemoveCardFromDeck(int cardID) {
+
+    }
+
+    public void PutCardInDiscardPile(int cardID) {
+
+    }
+
+    public void RemoveCardFromDiscardPile(int cardID) {
 
     }
 
@@ -64,11 +76,11 @@ public class BoardManager : MonoBehaviour, IUIManager
         
     }
 
-    public void DeactivateBasicAbilities() {
+    public void ActivateBasicAbilities() {
 
     }
 
-    public void ActivateBasicAbilities() {
+    public void DeactivateBasicAbilities() {
 
     }
 

@@ -40,11 +40,17 @@ public interface IUIManager
 
     void UpdatePlayerStunStatus(bool stunned);
 
-    void DrawCard(int cardID);
+    void PutCardInHand(int cardID);
 
-    void RemoveCardFromHand(int cardID, bool discarded);
+    void RemoveCardFromHand(int cardID);
+    
+    void PutCardInDeck(int cardID);
 
-    void PutCardInDiscardPile(int cardID, bool fromDeck);
+    void RemoveCardFromDeck(int cardID);
+
+    void PutCardInDiscardPile(int cardID);
+
+    void RemoveCardFromDiscardPile(int cardID);
 
     void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 
@@ -52,9 +58,9 @@ public interface IUIManager
 
     void UpdateDCCSCount(int dccsSlot, int newCountDown);
 
-    void DeactivateBasicAbilities();
-
     void ActivateBasicAbilities();
+
+    void DeactivateBasicAbilities();
 
     void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth);
 
