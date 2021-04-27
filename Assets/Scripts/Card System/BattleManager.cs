@@ -100,7 +100,7 @@ public class BattleManager : MonoBehaviour
         monsters = new Dictionary<int, Monster>();
         monsters.Add(
                 Constants.TEMPORARY_SINGLE_ENEMY_ID,
-                new Monster("demoMonster", 1, 50, 300, 1,
+                new Monster("demoMonster", 1, 50, 3, 1,
                         new MonsterAction[4] {
                                 MonsterAction.ATTACK,
                                 MonsterAction.ATTACK,
