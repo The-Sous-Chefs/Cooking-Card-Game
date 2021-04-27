@@ -188,7 +188,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18e7f7f90a34f4c74b1f11250cf567e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck: 
+  discardPile: 
   card: {fileID: 1349812047605934530, guid: d69f88c9bac37485f93469d530885d29, type: 3}
+  boardManagerObject: {fileID: 0}
   playerHealthBar: {fileID: 5440392735308604013}
   enemyHealthBar: {fileID: 917968285683350693}
   playerManaBar: {fileID: 5440392735378263517}
@@ -380,6 +383,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3780046831225957779, guid: 267e287d103dd4313820e27dea8b5847,
+        type: 3}
+      propertyPath: m_Value
+      value: 84
       objectReference: {fileID: 0}
     - target: {fileID: 3780046832162640582, guid: 267e287d103dd4313820e27dea8b5847,
         type: 3}
