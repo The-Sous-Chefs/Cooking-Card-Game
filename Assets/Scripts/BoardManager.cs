@@ -20,10 +20,15 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     // variables the UI needs to keep track of to work
     [SerializeField] private GameObject card;
-    private List<Card> hand;
+    [SerializeField] private GameObject[] dccsSlots = new GameObject[Constants.DCCS_SIZE];  // if more than 5 are added in inspector, they'll be ignored
+    private List<CardUI> hand;
+    private Dictionary<int, GameObject> dccs;
     private int numCardsInDeck;
     private int numCardsInDiscardPile;
     private bool playerStunned;
+    // FIXME: Make enemies dynamically (See the comments about the TestEnemy in
+    //        TestUIManager.cs)
+    [SerializeField] TestEnemy enemy;
 
     // variables used only to display information to the player
     [SerializeField] private Text chefHPText;
@@ -48,7 +53,18 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         Debug.Assert(card != null);
 
-        hand = new List<Card>();
+        hand = new List<CardUI>();
+        dccs = new Dictionary<int, GameObject>();
+        for(int i = 0; i < Constants.DCCS_SIZE; i++)
+        {
+            dccs.Add(i, dccsSlots[i]);
+            Transform countTransform = dccsSlots[i].transform.Find(Constants.DCCS_COUNT_NAME);
+            if(countTransform != null)
+            {
+                Text countText = countTransform.gameObject.GetComponent<Text>();
+                countText.text = "";
+            }
+        }
 
         numCardsInDeck = 0;
         numCardsInDiscardPile = 0;
@@ -56,7 +72,7 @@ public class BoardManager : MonoBehaviour, IUIManager
 
         chefHPText.text = "HP: #";
         chefManaText.text = "Mana: #";
-        chefBlockText.text = "Blocking 0% of damage from enemies.";
+        chefBlockText.text = "Blocking 0% damage";
         deckCountText.text = numCardsInDeck.ToString();
         discardPileCountText.text = numCardsInDiscardPile.ToString();
         stunIndicatorImage.enabled = false;
@@ -121,11 +137,21 @@ public class BoardManager : MonoBehaviour, IUIManager
         GameObject newCardInUI = Instantiate(card, handContainer);
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
+        hand.Add(newCardInUI.GetComponent<CardUI>());
     }
 
     public void RemoveCardFromHand(int cardID)
     {
-        //
+        for(int i = 0; i < hand.Count; i++)
+        {
+            if(hand[i].GetCardID() == cardID)
+            {
+                CardUI removedCard = hand[i];
+                hand.RemoveAt(i);
+                Destroy(removedCard.gameObject);
+                break;
+            }
+        }
     }
 
     public void PutCardInDeck(int cardID)
@@ -154,17 +180,75 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void PutCardInDCCS(int cardID, int countDown, int dccsSlot)
     {
-        //
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        Transform dccsSlotTransform = dccs[dccsSlot].transform;
+        if(dccsSlotTransform != null)
+        {
+            Transform cardHolderTransform = dccsSlotTransform.Find(Constants.DCCS_CARD_HOLDER_NAME);
+            if(cardHolderTransform != null)
+            {
+                Debug.Assert(cardHolderTransform.childCount == 0);
+                GameObject dccsCard = Instantiate(card, cardHolderTransform);
+                RectTransform dccsCardTransform = (RectTransform) dccsCard.transform;
+                dccsCardTransform.anchoredPosition = Vector2.zero;
+                dccsCard.GetComponent<CardUI>().CreateCard(cardID);
+                dccsCard.GetComponent<DragDrop>().SetCanDrag(false);
+            }
+            Transform countTransform = dccsSlotTransform.Find(Constants.DCCS_COUNT_NAME);
+            if(countTransform != null)
+            {
+                Text countText = countTransform.gameObject.GetComponent<Text>();
+                if(countText != null)
+                {
+                    countText.text = countDown.ToString();
+                }
+            }
+        }
     }
 
     public void RemoveCardFromDCCS(int dccsSlot)
     {
-        //
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        Transform dccsSlotTransform = dccs[dccsSlot].transform;
+        if(dccsSlotTransform != null)
+        {
+            Transform cardHolderTransform = dccsSlotTransform.Find(Constants.DCCS_CARD_HOLDER_NAME);
+            if(cardHolderTransform != null)
+            {
+                Debug.Assert(cardHolderTransform.childCount == 1);
+                GameObject dccsCard = cardHolderTransform.GetChild(0).gameObject;
+                Destroy(dccsCard);
+            }
+            Transform countTransform = dccsSlotTransform.Find(Constants.DCCS_COUNT_NAME);
+            if(countTransform != null)
+            {
+                Text countText = countTransform.gameObject.GetComponent<Text>();
+                if(countText != null)
+                {
+                    countText.text = "";
+                }
+            }
+        }
     }
 
     public void UpdateDCCSCount(int dccsSlot, int newCountDown)
     {
-        //
+        Debug.Assert((dccsSlot >= 0) && (dccsSlot < Constants.DCCS_SIZE));
+        Transform dccsSlotTransform = dccs[dccsSlot].transform;
+        if(dccsSlotTransform != null)
+        {
+            Transform countTransform = dccsSlotTransform.Find(Constants.DCCS_COUNT_NAME);
+            if(countTransform != null)
+            {
+                Text countText = countTransform.gameObject.GetComponent<Text>();
+                if(countText != null)
+                {
+                    // countText.text of "" would indicate that there's not a card in that slot
+                    Debug.Assert(countText.text != "");
+                    countText.text = newCountDown.ToString();
+                }
+            }
+        }
     }
 
     public void ActivateBasicAbilities()
@@ -183,22 +267,23 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void AddEnemy(int monsterID, Monster monster)
     {
-        //
+        enemy.SetNameText(monster.name);
+        enemy.SetHPText(monster.maxHP, monster.currentHP);
     }
 
     public void RemoveEnemy(int monsterID)
     {
-        //
+        // do nothing, since there's only one sort of hard-coded enemy at the moment
     }
 
     public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth)
     {
-        //
+        enemy.SetHPText(maxHealth, currentHealth);
     }
 
     public void UpdateEnemyStunStatus(int monsterID, bool stunned)
     {
-        //
+        enemy.ToggleStunned(stunned);
     }
 
     public void WinGame()
