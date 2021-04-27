@@ -6,24 +6,32 @@ using Random = UnityEngine.Random;
 
 public class RoadGen
 {
-    public int width;
     public int length;
     public TerrainData tData;
+    public float padding;
+    public float minRoadLength;
+    public float maxRoadLength;
+    public float roadDelta;
+    public int recDepth;
 
-    public RoadGen(int width, int length, TerrainData tData)
+    public RoadGen(int length, TerrainData tData, float padding, float minRoadLength, float maxRoadLength, float roadDelta, int recDepth)
     {
-        this.width = width;
         this.length = length;
         this.tData = tData;
+        this.padding = padding;
+        this.minRoadLength = minRoadLength;
+        this.maxRoadLength = maxRoadLength;
+        this.roadDelta = roadDelta;
+        this.recDepth = recDepth;
     }
 
     public RoadGraph GenerateRoadGraph()
     {
         RoadGraph rGraph = new RoadGraph();
-        rGraph.AddEdge(new Vector3(0f, 0f, 0f), new Vector3(length, 0f,  width), true);
+        rGraph.AddEdge(new Vector3(0f, 0f, 0f), new Vector3(length, 0f,  length), true);
         rGraph.AddEdge(new Vector3(0f, 0f, 0f), new Vector3(length, 0f, 0f), true);
-        rGraph.AddEdge(new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, width), true);
-        rGraph.AddEdge(new Vector3(length, 0f, 0f), new Vector3(length, 0f, width / 2), true);
+        rGraph.AddEdge(new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, length), true);
+        rGraph.AddEdge(new Vector3(length, 0f, 0f), new Vector3(length, 0f, length / 2), true);
 
         return rGraph;
     }
@@ -33,35 +41,46 @@ public class RoadGen
         RoadGraph rGraph = new RoadGraph();
 
         float x = (float)length / 2;
-        float y = (float)width / 2;
+        float y = (float)length / 2;
 
-        PrimaryLRecurse(x, y, 2 * Mathf.PI / 3, rGraph, 5);
-        // PrimaryLRecurse(x, y, 4 * Mathf.PI / 3, rGraph, 5);
-        // PrimaryLRecurse(x, y, 0, rGraph, 5);
+        rGraph.AddEdge(new Vector3(0f + padding, 0f, 0f + padding), new Vector3(0f + padding, 0f, length - padding), true);
+        rGraph.AddEdge(new Vector3(0f + padding, 0f, 0f + padding), new Vector3(length - padding, 0f, 0f + padding), true);
+        rGraph.AddEdge(new Vector3(length - padding, 0f, length - padding), new Vector3(0f + padding, 0f, length - padding), true);
+        rGraph.AddEdge(new Vector3(length - padding, 0f, length - padding), new Vector3(length - padding, 0f, 0f + padding), true);
+        for (int i = 0; i < 10; i++)
+        {
+            x = Random.Range(padding, length - padding);
+            y = Random.Range(padding, length - padding);
+            float h = Random.Range(-2 * Mathf.PI, 0);
+            PrimaryLRecurse(x, y, h, rGraph, recDepth);
+        }
+        // PrimaryLRecurse(x, y, 2 * Mathf.PI / 3, rGraph, recDepth);
+        // PrimaryLRecurse(x, y, 4 * Mathf.PI / 3, rGraph, recDepth);
+        // PrimaryLRecurse(x, y, 0, rGraph, recDepth);
 
         return rGraph;
     }
 
-    public RoadGraph TerrainAdapt(RoadGraph rGraph)
+    public RoadGraph TerrainAdapt(RoadGraph rGraph, float tStep)
     {
         RoadGraph tGraph = new RoadGraph();
+        var visited = new HashSet<(Vector3, Vector3)>();
         foreach (var a in rGraph.graph.Keys)
         {
             foreach(var b in rGraph.graph[a])
             {
+                if (visited.Contains((b, a))) continue;
+                visited.Add((a, b));
                 float length = tData.heightmapResolution;
                 Vector3 start = new Vector3(a.x, tData.GetInterpolatedHeight(a.x / length, a.z / length), a.z);
                 Vector3 dest = new Vector3(b.x, tData.GetInterpolatedHeight(b.x / length, b.z / length), b.z);
 
-                if (tGraph.graph.ContainsKey(start) && tGraph.graph.ContainsKey(dest))
-                    continue;
-
                 var current = new Vector3(start.x, start.y, start.z);
 
-                int maxSteps = 100;
+                int maxSteps = 1000;
                 while (maxSteps --> 0)
                 {
-                    Vector3 next = NextStep(start, dest, current, 5f);
+                    Vector3 next = NextStep(start, dest, current, tStep);
                     tGraph.AddEdge(current, next, true);
                     if (next.Equals(dest)) break;
                     current = next;
@@ -112,7 +131,9 @@ public class RoadGen
             }
         }
 
-        return minDevianceStep;
+        dir = current + dir;
+        dir.y = tData.GetInterpolatedHeight(dir.x / tData.heightmapResolution, dir.z / tData.heightmapResolution);
+        return (minDevianceStep + dir) / 2;
     }
 
     private void PrimaryLRecurse(float x, float y, float heading, RoadGraph rGraph, int depth)
@@ -122,15 +143,27 @@ public class RoadGen
         depth--;
 
         heading += Random.Range(-Mathf.PI / 8, Mathf.PI / 8);
-        float roadLength = Random.Range(15f, 55f);
+        float roadLength = Random.Range(minRoadLength, maxRoadLength);
 
         float xD = x + roadLength * Mathf.Cos(heading);
         float yD = y + roadLength * Mathf.Sin(heading);
+        if (xD < 0f + padding || xD > length - padding || yD < 0f + padding || yD > length - padding)
+        {
+            return;
+        }
         bool intersected;
+        bool cancel;
+        Vector3 intersect;
 
-        (xD, yD, intersected) = rGraph.DeltaCheck(xD, yD, 5f);
+        (intersect, intersected, cancel) = rGraph.DeltaCheck(new Vector3(xD, 0f, yD), new Vector3(x, 0f, y), roadDelta);
+        xD = intersect.x;
+        yD = intersect.z;
 
-        rGraph.AddEdge(new Vector3(x, 0f, y), new Vector3(xD, 0f, yD), true);
+        if (cancel)
+        {
+            return;
+        }
+        rGraph.AddEdge(new Vector3(x, 0f, y), intersect, true);
         if (intersected)
         {
             return;
@@ -190,14 +223,6 @@ public class RoadGraph
             else
                 AddVertex(b);
 
-        foreach (var i in graph.Keys)
-        {
-            foreach(var j in graph[i])
-            {
-
-            }
-        }
-
         if (!graph[a].Contains(b))
             graph[a].Add(b);
         if (!graph[b].Contains(a))
@@ -206,38 +231,142 @@ public class RoadGraph
         return true;
     }
 
-    public (float, float, bool) DeltaCheck(float x, float y, float delta)
+    private float Cross(Vector2 x, Vector2 y)
     {
-        var coord = new Vector3(x, 0f, y);
+        return x.x * y.y - x.y * y.x;
+    }
 
+    public (Vector3, bool, bool) DeltaCheck(Vector3 coord, Vector3 oldCoord, float delta)
+    {
         // Checking for point point intersection
         foreach (var p in graph.Keys)
         {
             if ((coord - p).magnitude <= delta)
             {
-                // TODO: Check for allowable angle
-                return (p.x, p.z, true);
+                // Check for allowable angle
+                if (graph[p].Count >= 4)
+                {
+                    return (new Vector3(), false, true);
+                }
+                foreach (var b in graph[p])
+                {
+                    var x = (oldCoord - p).normalized;
+                    var y = (b - p).normalized;
+                    if (Mathf.Abs(Vector3.Dot(x, y)) > .7f)
+                    {
+                        return (new Vector3(), false, true);
+                    }
+                }
+                return (new Vector3(p.x, 0f, p.z), true, false);
             }
         }
 
-        // TODO: Checking for point road intersection
+        // Checking for point road intersection
         foreach (var a in graph.Keys)
         {
+            if (a.Equals(oldCoord)) continue;
             foreach (var b in graph[a])
             {
+                if (b.Equals(oldCoord)) continue;
                 var M = b - a;
                 float t = Vector3.Dot((coord - a), M) / Vector3.Dot(M, M);
                 var P = a + t * M;
                 var d = (coord - P).magnitude;
                 if (d <= delta)
                 {
-                    return (P.x, P.z, true);
+                    if (Vector3.Dot((P-a).normalized, (P-b).normalized) > 0)
+                    {
+                        continue;
+                    }
+                    if (Mathf.Abs(Vector3.Dot((b - a).normalized, (P - oldCoord).normalized)) > 0.7f) {
+                        return (coord, false, true);
+                    }
+                    var c = new Vector3(P.x, 0f, P.z);
+                    graph[a].Remove(b);
+                    graph[b].Remove(a);
+                    AddEdge(a, c, true);
+                    AddEdge(b, c, true);
+                    return (c, true, false);
                 }
             }
         }
 
+        // Checking for road road intersections
+        foreach (var a in graph.Keys)
+        {
+            if (a.Equals(oldCoord)) continue;
+            foreach (var b in graph[a])
+            {
+                if (b.Equals(oldCoord)) continue;
+                var q = new Vector2(oldCoord.x, oldCoord.z);
+                var s = new Vector2(coord.x, coord.z);
+                var p = new Vector2(b.x, b.z);
+                var r = new Vector2(a.x, a.z);
 
-        return (x, y, false);
+                Vector2 s1 = new Vector2(s.x - q.x, s.y - q.y);
+                Vector2 s2 = new Vector2(r.x - p.x, r.y - p.y);
+                float c = (-s1.y * (q.x - p.x) + s1.x * (q.y - p.y)) / (-s2.x * s1.y + s1.x * s2.y);
+                float t = (s2.x * (q.y - p.y) - s2.y * (q.x - p.y)) / (-s2.x * s1.y + s1.x * s2.y);
+
+                if (c >= 0 && c <= 1 && t >= 0 && t <= 1)
+                {
+                    return (coord, false, true);
+                }
+
+
+                /**
+                var q = new Vector2(oldCoord.x, oldCoord.z);
+                var s = new Vector2(coord.x, coord.z);
+                var p = new Vector2(b.x, b.z);
+                var r = new Vector2(a.x, a.z);
+
+                var t = Cross(q - p, s) / Cross(r, s);
+                var u = Cross(q - p, r) / Cross(r, s);
+                if (Cross(r, s) == 0 && Cross(q - p, r) == 0)
+                {
+                    var t0 = Vector2.Dot(q - p, r) / Vector2.Dot(r, r);
+                    var t1 = Vector2.Dot(q + s - p, r) / Vector2.Dot(r, r);
+                    if (t0 >= 0 && t0 <= 1 || t1 >= 0 && t1 <= 1)
+                    {
+                        Debug.Log("Colinear");
+                        return (coord, false, true);
+                    }
+                }
+                else if (Cross(r, s) == 0 && Cross(q - p, r) != 0) continue;
+                else if (Cross(r, s) != 0 && t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                {
+                    // TODO: FIX THIS
+                    Debug.Log("Road Intersection");
+                    Debug.Log("Q: " + q);
+                    Debug.Log("S: " + s);
+                    Debug.Log("P: " + p);
+                    Debug.Log("R: " + r);
+                    return (coord, false, true);
+                    var isect = p + t * r;
+                    var i = new Vector3(isect.x, 0f, isect.y);
+
+                    foreach (var x in new Vector3[] {b, a})
+                    {
+                        if ((i-x).magnitude <= delta)
+                        {
+                            if (graph[x].Count >= 4) return (coord, false, true);
+                            foreach (var y in graph[x])
+                            {
+                                var g = (oldCoord - x).normalized;
+                                var h = (y - x).normalized;
+                                if (Vector3.Dot(g, h) > .5) return (new Vector3(), false, true);
+                            }
+                            return (x, true, false);
+                        }
+                    }
+                    // if (Mathf.Abs(Vector3.Dot(i-a, i-b) > 0.5f)
+                }
+                **/
+            }
+        }
+
+
+        return (coord, false, false);
     }
 
     public Vector3 InterpolateSpline((Vector3, Vector3) road, float dist)
@@ -246,6 +375,14 @@ public class RoadGraph
         var b = road.Item2;
         var l = a;
         var r = b;
+
+        if (graph[a].Count == 2)
+            foreach (var c in graph[a])
+                if (!c.Equals(b))
+                    l = c;
+        if (graph[b].Count == 2)
+            foreach (var c in graph[b])
+                if (!c.Equals(a)) r = c;
 
         var t = dist / (b - a).magnitude;
         if (graph[a].Count == 2)
@@ -273,13 +410,6 @@ public class RoadGraph
     }
     public (Vector3, Vector3) GetPointAlong((Vector3, Vector3) road, float dist)
     {
-
-        /*
-        var along = d * dist + a;
-        var n = new Vector3(d.x, 0, d.z).normalized;
-        n = new Vector3(-d.z, 0, d.x).normalized;
-        */
-
         var along = InterpolateSpline(road, dist);
         var a = InterpolateSpline(road, dist - 0.01f);
         var b = InterpolateSpline(road, dist + 0.01f);
