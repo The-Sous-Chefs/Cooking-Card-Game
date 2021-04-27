@@ -30,7 +30,8 @@ public class DCCard
 
 public class BattleManager : MonoBehaviour
 {
-    // only serialized for debugging purposes
+    // deck, discardPile, hand, and monsters are serialized for debugging
+    // purposes
     [SerializeField] private List<int> deck;
     [SerializeField] private List<int> discardPile;
     [SerializeField] private List<int> hand;
@@ -38,13 +39,9 @@ public class BattleManager : MonoBehaviour
     private bool cantUseBasicAbility;
     private float blockPercent;
     private int stunnedTurns;
+    [SerializeField] private Dictionary<int, Monster> monsters;
     [SerializeField] private GameObject boardManagerObject;
     private IUIManager boardManager;
-
-    // TEMPORARY: Just for testing before UI is implemented, should be removed
-    [SerializeField] private Enemy targetEnemy;
-
-    private int enemyPatternIndex;
 
     void Start()
     {
@@ -55,12 +52,9 @@ public class BattleManager : MonoBehaviour
         // Start(), so boardManager will be null at the time; if for some
         // reason, however BattleManager is disabled, then re-enabled, we'll
         // want it in OnEnable() as well
-        if(boardManager != null)
-        {
-            boardManager.CardPlayedEvent += PlayCard;
-            boardManager.BasicAbilityUsedEvent += PlayCard;
-            boardManager.PlayerTurnEndedEvent += HandleEndOfPlayerTurn;
-        }
+        boardManager.CardPlayedEvent += PlayCard;
+        boardManager.BasicAbilityUsedEvent += PlayCard;
+        boardManager.PlayerTurnEndedEvent += HandleEndOfPlayerTurn;
 
         // initialize the deck, discardPile, hand, and DCCS
         deck = PlayerStats.Instance.GetCollectedCardIDs();
@@ -81,13 +75,44 @@ public class BattleManager : MonoBehaviour
         // debugging card: put the card would like to test here
         // int testCardID = 1;
         // hand.Add(testCardID);
-        // boardManager.PutCardInHand(testCardID)
+        // boardManager.PutCardInHand(testCardID);
 
         // initialize cantUseBasicAbility to false, block percentage to 0%,
         // and stunned status to not stunned
         cantUseBasicAbility = false;
         blockPercent = 0.0f;
         stunnedTurns = 0;
+
+        // initialize UI fields for HP, mana, block percentage, and stun status
+        boardManager.UpdatePlayerHealth(
+                PlayerStats.Instance.GetMaxHealth(),
+                PlayerStats.Instance.GetHealth()
+        );
+        boardManager.UpdatePlayerMana(
+                PlayerStats.Instance.GetMaxGlobalMana(),
+                PlayerStats.Instance.GetGlobalMana()
+        );
+        boardManager.UpdatePlayerBlockPercent(blockPercent);
+        boardManager.UpdatePlayerStunStatus(false);
+
+        // initialize the monsters
+        // FIXME: Do it dynamically!
+        monsters = new Dictionary<int, Monster>();
+        monsters.Add(
+                Constants.TEMPORARY_SINGLE_ENEMY_ID,
+                new Monster("demoMonster", 1, 50, 3, 1,
+                        new MonsterAction[4] {
+                                MonsterAction.ATTACK,
+                                MonsterAction.ATTACK,
+                                MonsterAction.ATTACK,
+                                MonsterAction.SKILL
+                        }
+                )
+        );
+        foreach(int monsterID in monsters.Keys)
+        {
+            boardManager.AddEnemy(monsterID, monsters[monsterID]);
+        }
 
         // NOTE: If we want the player to draw a card on the first turn or just
         //       have the start of the first turn treated like any other turn,
@@ -281,9 +306,9 @@ public class BattleManager : MonoBehaviour
 
     private void ResolveCardEffects(Card card)
     {
-        TargettedDamageHandler(card, targetEnemy);
+        TargettedDamageHandler(card, Constants.TEMPORARY_SINGLE_ENEMY_ID);
         AOEDamageHandler(card);
-        StunHandler(card);
+        StunHandler(card, Constants.TEMPORARY_SINGLE_ENEMY_ID);
         HealHandler(card);
         ManaRegenHandler(card);
         BlockHandler(card);
@@ -292,13 +317,26 @@ public class BattleManager : MonoBehaviour
         DrawHandler(card);
     }
 
-    private bool TargettedDamageHandler(Card card, Enemy targetEnemy)
+    private bool TargettedDamageHandler(Card card, int targetMonster)
     {
+        Debug.Assert(new List<int>(monsters.Keys).Contains(targetMonster));
         if(card.singleDamage > 0)
         {
-            Debug.Log("Dealing " + card.singleDamage + " damage to " + targetEnemy.enmName);
-            targetEnemy.monsterList[0].DecreaseHP(card.singleDamage);
-            if(targetEnemy.monsterList[0].currentHp <= 0)
+            Debug.Log("Dealing " + card.singleDamage + " damage to " + monsters[targetMonster].name + ".");
+            monsters[targetMonster].DecreaseHP(card.singleDamage);
+            if(monsters[targetMonster].currentHP <= 0)
+            {
+                boardManager.RemoveEnemy(targetMonster);
+            }
+            else
+            {
+                boardManager.UpdateEnemyHealth(
+                        targetMonster,
+                        monsters[targetMonster].maxHP,
+                        monsters[targetMonster].currentHP
+                );
+            }
+            if(CheckIfAllEnemiesDefeated())
             {
                 boardManager.WinGame();
             }
@@ -312,9 +350,24 @@ public class BattleManager : MonoBehaviour
         // placeholder before we have a multi-enemies battle system
         if(card.aoeDamage > 0)
         {
-            Debug.Log("Dealing " + card.aoeDamage + " damage to all");
-            targetEnemy.monsterList[0].DecreaseHP(card.aoeDamage);
-            if(targetEnemy.monsterList[0].currentHp <= 0)
+            Debug.Log("Dealing " + card.aoeDamage + " damage to all enemies.");
+            foreach(int monsterID in monsters.Keys)
+            {
+                monsters[monsterID].DecreaseHP(card.aoeDamage);
+                if(monsters[monsterID].currentHP <= 0)
+                {
+                    boardManager.RemoveEnemy(monsterID);
+                }
+                else
+                {
+                    boardManager.UpdateEnemyHealth(
+                            monsterID,
+                            monsters[monsterID].maxHP,
+                            monsters[monsterID].currentHP
+                    );
+                }
+            }
+            if(CheckIfAllEnemiesDefeated())
             {
                 boardManager.WinGame();
             }
@@ -323,12 +376,13 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
-    private bool StunHandler(Card card)
+    private bool StunHandler(Card card, int targetMonster)
     {
         if(card.stuns)
         {
             Debug.Log("Stunning the enemy");
-            targetEnemy.monsterList[0].getStunned();
+            monsters[targetMonster].BecomeStunned();
+            boardManager.UpdateEnemyStunStatus(targetMonster, true);
             return true;
         }
         return false;
@@ -473,9 +527,6 @@ public class BattleManager : MonoBehaviour
             boardManager.PutCardInDiscardPile(removedCard);
         }
 
-        //reset the debuff of the enemies (currently, the stunning effect), I tried many places and found out placing this line here will work.
-        targetEnemy.monsterList[0].clearEffect();
-
         // the player draws a card every turn (except, technically, the first,
         // since nothing will call StartPlayerTurn() at that point)
         DrawCard();
@@ -502,36 +553,37 @@ public class BattleManager : MonoBehaviour
     // NOTE: This method used to be public and called directly by a button
     private void DoEnemyTurn()
     {
-        if (!targetEnemy.monsterList[0].stunned)
+        foreach(int monsterID in monsters.Keys)
         {
-            int curAction = targetEnemy.monsterList[0].actionpattern[enemyPatternIndex];
-            Debug.Log("Enemy turn start : " + curAction);
-            switch(curAction)
+            Monster currentMonster = monsters[monsterID];
+            Debug.Log("Monster " + currentMonster.name + "'s turn.");
+            MonsterAction monsterAction = currentMonster.GetTurnAction();
+            Debug.Log("Action is " + monsterAction);
+            switch(monsterAction)
             {
-                case 0:
+                case MonsterAction.REST:
                     break;
-                case 1:
-                    HandleEnemyAttack();
+                case MonsterAction.ATTACK:
+                    HandleEnemyAttack(monsterID);
                     break;
-                case 2:
-                    HandleEnemySpecialSkill();
+                case MonsterAction.SKILL:
+                    HandleEnemySpecialSkill(monsterID);
                     break;
                 default:
-                    Debug.Log("Invalid behavior in monster: " + targetEnemy.monsterList[0].name);
+                    Debug.Log("Invalid behavior in monster: " + currentMonster.name);
                     break;
             }
 
-            enemyPatternIndex += 1;
-            if(enemyPatternIndex == targetEnemy.monsterList[0].actionpattern.Length)
-            {
-                enemyPatternIndex = 0;
-            }
+            // reset any debuffs on the current enemy at the end of their turn
+            // (currently, just the stunning effect)
+            currentMonster.ClearEffects();
+            boardManager.UpdateEnemyStunStatus(monsterID, false);
         }
     }
 
-    private void HandleEnemyAttack()
+    private void HandleEnemyAttack(int monsterID)
     {
-        int actualDamage = (int) (((float) targetEnemy.monsterList[0].basicAtt) * (1.0f - blockPercent));
+        int actualDamage = (int) (((float) monsters[monsterID].attackDamage) * (1.0f - blockPercent));
         if(actualDamage >= 0f)
         {
             // apply actualDamage to the player
@@ -549,26 +601,54 @@ public class BattleManager : MonoBehaviour
         {
             // actualDamage is the negative of the excess block percentage times
             // the original damage, so apply that damage to the enemy
-            targetEnemy.monsterList[0].DecreaseHP(actualDamage * -1);
-            if(targetEnemy.monsterList[0].currentHp <= 0)
+            monsters[monsterID].DecreaseHP(actualDamage * -1);
+            if(monsters[monsterID].currentHP <= 0)
             {
-                boardManager.WinGame();
+                boardManager.RemoveEnemy(monsterID);
+            }
+            else
+            {
+                boardManager.UpdateEnemyHealth(
+                        monsterID,
+                        monsters[monsterID].maxHP,
+                        monsters[monsterID].currentHP
+                );
+            }
+            foreach(int innerMonsterID in monsters.Keys)
+            {
+                if(CheckIfAllEnemiesDefeated())
+                {
+                    boardManager.WinGame();
+                }
             }
         }
     }
 
-    private void HandleEnemySpecialSkill()
+    private void HandleEnemySpecialSkill(int monsterID)
     {
         // NOTE: This method assumes the only special skill is stunning the
         //       player--which may be the case.
-        Debug.Assert(targetEnemy.monsterList[0].skilleffect > 0);
+        Debug.Assert(monsters[monsterID].stunDuration > 0);
         // add turns, just in case stuns get applied one after another
-        stunnedTurns += targetEnemy.monsterList[0].skilleffect;
+        stunnedTurns += monsters[monsterID].stunDuration;
         boardManager.UpdatePlayerStunStatus(true);
         // being stunned prevents the use of basic abilities as well,
         // StartPlayerTurn() will re-enable them when they stop being stunned
         cantUseBasicAbility = true;
         boardManager.DeactivateBasicAbilities();
+    }
+
+    private bool CheckIfAllEnemiesDefeated()
+    {
+        foreach(int monsterID in monsters.Keys)
+        {
+            if(monsters[monsterID].currentHP > 0)
+            {
+                return false;
+            }
+        }
+        // only return true if all enemies have <= 0 health
+        return true;
     }
 }
 

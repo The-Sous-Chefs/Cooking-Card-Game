@@ -641,7 +641,6 @@ MonoBehaviour:
   discardPile: 
   hand: 
   boardManagerObject: {fileID: 185450210}
-  targetEnemy: {fileID: 213496028}
 --- !u!4 &185450212
 Transform:
   m_ObjectHideFlags: 0
@@ -686,6 +685,7 @@ MonoBehaviour:
   monsterSwitcherImage: {fileID: 544649322}
   winMessage: {fileID: 720545050}
   loseMessage: {fileID: 1671747182}
+  enemy: {fileID: 213496028}
 --- !u!1 &197123053
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,10 +954,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5eab385953e29b439223695584d09fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hptxt: {fileID: 1192642095}
-  enmName: {fileID: 297908864}
-  playedCardUIPlaceHolder: {fileID: 0}
-  battleManager: {fileID: 185450210}
+  nameText: {fileID: 297908864}
+  hpText: {fileID: 1192642095}
+  enemyImage: {fileID: 213496026}
 --- !u!1 &216949494
 GameObject:
   m_ObjectHideFlags: 0
@@ -3901,8 +3900,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: RestartDemo
+      - m_Target: {fileID: 185450213}
+        m_MethodName: RestartBattle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4929,8 +4928,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185450211}
-        m_MethodName: RestartDemo
+      - m_Target: {fileID: 185450213}
+        m_MethodName: RestartBattle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

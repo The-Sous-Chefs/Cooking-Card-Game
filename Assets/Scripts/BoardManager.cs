@@ -84,11 +84,19 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     }
 
-    public void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth) {
+    public void AddEnemy(int monsterID, Monster monster) {
 
     }
 
-    public void RemoveEnemy(int enemyID) {
+    public void RemoveEnemy(int monsterID) {
+
+    }
+
+    public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth) {
+
+    }
+
+    public void UpdateEnemyStunStatus(int monsterID, bool stunned) {
 
     }
 

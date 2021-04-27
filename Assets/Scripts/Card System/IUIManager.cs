@@ -62,9 +62,13 @@ public interface IUIManager
 
     void DeactivateBasicAbilities();
 
-    void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth);
+    void AddEnemy(int monsterID, Monster monster);
 
-    void RemoveEnemy(int enemyID);
+    void RemoveEnemy(int monsterID);
+
+    void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth);
+
+    void UpdateEnemyStunStatus(int monsterID, bool stunned);
 
     void WinGame();
 

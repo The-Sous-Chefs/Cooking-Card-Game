@@ -28,4 +28,7 @@ public static class Constants
     public static int STARTING_HAND_SIZE = 4;
     public static int MAX_HAND_SIZE = 10;
     public static int DCCS_SIZE = 5;
+
+    // temporary constants
+    public static int TEMPORARY_SINGLE_ENEMY_ID = 0;
 }

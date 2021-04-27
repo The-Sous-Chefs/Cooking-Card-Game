@@ -48,6 +48,17 @@ public class TestUIManager : MonoBehaviour, IUIManager
     [SerializeField] private GameObject winMessage;
     [SerializeField] private GameObject loseMessage;
 
+    // NOTE: This TestUIManager is essentially hard-coded to only support one
+    //       enemy. AddEnemy() ignore the monsterID and just updates the text
+    //       fields of the TestEnemy below. Additionally, RemoveEnemy() does
+    //       nothing, since there's no point in removing the only enemy, since
+    //       the game will end when its health reaches 0. Also, UpdateEnemyHealth()
+    //       also ignores the monsterID and just updates the HP text field of
+    //       the TestEnemy below. Finally, UpdateEnemyStunStatus() also ignores
+    //       the monsterID and just updates the stunned appearance of the
+    //       TestEnemy below.
+    [SerializeField] private TestEnemy enemy;
+
     // NOTE: Using Awake() instead of Start(), since the BattleManager gets a
     //       reference to a IUIManager in it's Start() method, and since Awake()
     //       always runs before Start(), we're guaranteed it will be initialized
@@ -63,12 +74,12 @@ public class TestUIManager : MonoBehaviour, IUIManager
         numCardsInDiscardPile = 0;
         playerStunned = false;
 
-        chefHPText.text = "HP: " + PlayerStats.Instance.GetHealth();
-        chefManaText.text = "Mana: " + PlayerStats.Instance.GetGlobalMana();
+        chefHPText.text = "HP: #";
+        chefManaText.text = "Mana: #";
         chefBlockText.text = "Blocking 0% of damage from enemies.";
         stunIndicatorImage.enabled = false;
-        deckSizeText.text = "0";
-        discardPileSizeText.text = "0";
+        deckSizeText.text = numCardsInDeck.ToString();
+        discardPileSizeText.text = numCardsInDiscardPile.ToString();
         UpdateDCCSContents();
     }
 
@@ -92,12 +103,12 @@ public class TestUIManager : MonoBehaviour, IUIManager
         UpdateSelectedCardText();
     }
 
-    public void pickClickedCurrentCard(int id)
-    {
-        //Debug.Assert(cardsInHand.Contains(id));
-        currentCardIndex = cardsInHand.IndexOf(id);
-        Debug.Log("card id "+id+" selected because of dragging");
-    }
+    // public void pickClickedCurrentCard(int id)
+    // {
+    //     //Debug.Assert(cardsInHand.Contains(id));
+    //     currentCardIndex = cardsInHand.IndexOf(id);
+    //     Debug.Log("card id "+id+" selected because of dragging");
+    // }
 
     public void PlayCurrentCard()
     {
@@ -343,14 +354,30 @@ public class TestUIManager : MonoBehaviour, IUIManager
         basicManaRefreshButton.interactable = false;
     }
 
-    public void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth)
+    // see the big comment by the TestEnemy member variable
+    public void AddEnemy(int monsterID, Monster monster)
     {
-        //
+        enemy.SetNameText(monster.name);
+        enemy.SetHPText(monster.maxHP, monster.currentHP);
     }
 
-    public void RemoveEnemy(int enemyID)
+    // see the big comment by the TestEnemy member variable
+    public void RemoveEnemy(int monsterID)
     {
-        //
+        // do nothing, this UI doesn't really need to worry about it since it
+        // just has one enemy
+    }
+
+    // see the big comment by the TestEnemy member variable
+    public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth)
+    {
+        enemy.SetHPText(maxHealth, currentHealth);
+    }
+
+    // see the big comment by the TestEnemy member variable
+    public void UpdateEnemyStunStatus(int monsterID, bool stunned)
+    {
+        enemy.ToggleStunned(stunned);
     }
 
     public void WinGame()
