@@ -26,5 +26,13 @@ public static class Constants
 
     // deck-related constants
     public static int STARTING_HAND_SIZE = 4;
+    public static int MAX_HAND_SIZE = 10;
     public static int DCCS_SIZE = 5;
+
+    // UI-related constants
+    public static string DCCS_CARD_HOLDER_NAME = "CardHolder";
+    public static string DCCS_COUNT_NAME = "Count";
+
+    // temporary constants
+    public static int TEMPORARY_SINGLE_ENEMY_ID = 0;
 }

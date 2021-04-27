@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public delegate void CardPlayedDelegate(int cardID);
+public delegate void BasicAbilityUsedDelegate(int abilityID);
 public delegate void PlayerTurnEndedDelgate();
 
 /*
@@ -24,6 +25,7 @@ public interface IUIManager
     //-------
 
     event CardPlayedDelegate CardPlayedEvent;
+    event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
     //--------
@@ -34,9 +36,21 @@ public interface IUIManager
 
     void UpdatePlayerMana(int maxMana, int currentMana);
 
-    void DrawCard(int cardID);
+    void UpdatePlayerBlockPercent(float blockPercent);
 
-    void RemoveCardFromHand(int cardID, bool discarded);
+    void UpdatePlayerStunStatus(bool stunned);
+
+    void PutCardInHand(int cardID);
+
+    void RemoveCardFromHand(int cardID);
+    
+    void PutCardInDeck(int cardID);
+
+    void RemoveCardFromDeck(int cardID);
+
+    void PutCardInDiscardPile(int cardID);
+
+    void RemoveCardFromDiscardPile(int cardID);
 
     void PutCardInDCCS(int cardID, int countDown, int dccsSlot);
 
@@ -44,13 +58,17 @@ public interface IUIManager
 
     void UpdateDCCSCount(int dccsSlot, int newCountDown);
 
-    void DeactivateBasicAbilities();
-
     void ActivateBasicAbilities();
 
-    void UpdateEnemyHealth(int enemyID, int maxHealth, int currentHealth);
+    void DeactivateBasicAbilities();
 
-    void RemoveEnemy(int enemyID);
+    void AddEnemy(int monsterID, Monster monster);
+
+    void RemoveEnemy(int monsterID);
+
+    void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth);
+
+    void UpdateEnemyStunStatus(int monsterID, bool stunned);
 
     void WinGame();
 

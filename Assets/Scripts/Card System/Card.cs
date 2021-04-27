@@ -112,13 +112,6 @@ public struct Card
         this.manaRegen = manaRegen;
         this.blockPercent = blockPercent;
         this.stuns = stuns;
-        if(this.stuns)
-        {
-            Debug.Assert(
-                this.cardType == CardType.CONTINUOUS,
-                "Only continuous cards can stun enemies."
-            );
-        }
 
         this.cardClasses = new List<CardClass>();
         if((this.singleDamage > 0) || (this.aoeDamage > 0))

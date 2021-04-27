@@ -1,5 +1,4 @@
 Name,Cost,Type,Turns In Play,Damage,AOE Damage,Heal,Draw,Discard,Mana Regen,Block,Stun (X = Yes),Basic Value,Ignore (X = Yes),Card Description
-Empty,9999,Basic,,,,,,,,,,,,No card selected
 Attack,3,Basic,,3,,,,,,,,,,Deal 3 damage to an enemy.
 Block,3,Basic,,,,,,,,0.5,,,,Block 50% of incoming damage this turn. (Blocking over 100% will reflect the excess percent of damage)
 Recover Mana,0,Basic,,,,,,1,4,,,,,"Discard one card, regenerate 4 global mana."

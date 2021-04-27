@@ -5,10 +5,11 @@ using UnityEngine.UI;
 
 public class CardUI : MonoBehaviour
 {
-    [SerializeField] private Text name;
-    [SerializeField] private Text cost;
-    [SerializeField] private Text text;
-    [SerializeField] private Image cardDisplay;
+    public Text cardName;
+    public Text cost;
+    public Text text;
+    public Image cardDisplay;
+    public int cardID;
 
     // Start is called before the first frame update
     void Start()
@@ -22,9 +23,17 @@ public class CardUI : MonoBehaviour
         
     }
 
-    void createCard(Card c) {
-        name.text = c.name;
-        text.text = c.cardText;
-        cost.text = c.cost.ToString();
+    public void CreateCard(int cardID)
+    {
+        this.cardID = cardID;
+        Card card = CardDatabase.Instance.GetCardByID(cardID);
+        cardName.text = card.name;
+        text.text = card.cardText;
+        cost.text = card.cost.ToString();
+    }
+
+    public int GetCardID()
+    {
+        return cardID;
     }
 }
