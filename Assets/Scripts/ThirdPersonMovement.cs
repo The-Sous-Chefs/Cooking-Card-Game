@@ -28,6 +28,7 @@ public class ThirdPersonMovement : MonoBehaviour
     public LayerMask buildingMask;
 
     public GameObject player;
+    public GameObject indicator;
     
     private void Start()
     {
@@ -46,10 +47,13 @@ public class ThirdPersonMovement : MonoBehaviour
     void Update()
     {
         bool inBuilding = Physics.CheckSphere(groundCheck.position, buildingDistance, buildingMask);
-        if (inBuilding && Input.GetButtonDown("Interact"))
+        if (inBuilding)
         {
-            SceneManager.LoadScene("BattleScene", LoadSceneMode.Additive);
-        }
+            indicator.SetActive(true);
+            if (Input.GetButtonDown("Interact")) 
+                SceneManager.LoadScene("BattleScene", LoadSceneMode.Additive);
+        } else
+            indicator.SetActive(false);
 
         bool isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && velocity.y < 0)
