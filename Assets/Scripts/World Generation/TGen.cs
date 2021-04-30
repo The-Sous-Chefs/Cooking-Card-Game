@@ -34,6 +34,7 @@ public class TGen : MonoBehaviour
     public float maxRoadLength = 250f;
     public float roadDelta = 25f;
     public int recDepth = 7;
+    public Material roadMaterial;
 
     [Space(10)]
     [Header("Building Generation")]
@@ -64,6 +65,7 @@ public class TGen : MonoBehaviour
         mesh.Clear();
         roadMeshObject.GetComponent<MeshFilter>().mesh = mesh;
         roadMeshObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+        roadMeshObject.GetComponent<MeshRenderer>().material = roadMaterial;
         if (enableRandom)
         {
             offsetX = Random.Range(100f, 999f);

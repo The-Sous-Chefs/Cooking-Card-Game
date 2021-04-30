@@ -231,11 +231,6 @@ public class RoadGraph
         return true;
     }
 
-    private float Cross(Vector2 x, Vector2 y)
-    {
-        return x.x * y.y - x.y * y.x;
-    }
-
     public (Vector3, bool, bool) DeltaCheck(Vector3 coord, Vector3 oldCoord, float delta)
     {
         // Checking for point point intersection
