@@ -14,6 +14,9 @@ public class BoardManager : MonoBehaviour, IUIManager
     public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
+
+    
+
     //-----------------
     // member variables
     //-----------------
@@ -29,6 +32,9 @@ public class BoardManager : MonoBehaviour, IUIManager
     // FIXME: Make enemies dynamically (See the comments about the TestEnemy in
     //        TestUIManager.cs)
     [SerializeField] TestEnemy enemy;
+    //For animation
+    //Will need to refactor chef, simply pass in the whole group, not so many variable.
+    public GameObject ChefGroup;
 
     // variables used only to display information to the player
     [SerializeField] private Text chefHPText;
@@ -48,6 +54,7 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     [SerializeField] private Transform handContainer;
     [SerializeField] private Canvas canvas;
+
 
     void Awake()
     {
@@ -90,11 +97,32 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
+
+    // don't know why the timer wait is not working here.
+    IEnumerator TimerHang()
+    {
+        Debug.Log("start timer");
+        yield return new WaitForSeconds(5);
+    }
     public void EndPlayerTurn()
     {
         if(PlayerTurnEndedEvent != null)
         {
+            Animator animator = enemy.GetComponent<Animator>();
+            if (animator != null)
+            {
+                Debug.Log("animating");
+                animator.SetTrigger("attack");
+            }
+            StartCoroutine(TimerHang());
+            Debug.Log("end timer");
             PlayerTurnEndedEvent();
+
+            if (animator != null)
+            {
+               // animator.ResetTrigger("attack");
+            }
+
         }
     }
 
@@ -135,6 +163,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
         hand.Add(newCardInUI.GetComponent<CardUI>());
+        //newCardInUI.GetComponent<FadeAnimation>().startFading();
     }
 
     public void RemoveCardFromHand(int cardID)

@@ -323,6 +323,13 @@ public class BattleManager : MonoBehaviour
         if(card.singleDamage > 0)
         {
             Debug.Log("Dealing " + card.singleDamage + " damage to " + monsters[targetMonster].name + ".");
+            Animator animator = boardManagerObject.GetComponent<BoardManager>().ChefGroup.GetComponent<Animator>();
+            if (animator != null)
+            {
+                Debug.Log("animating");
+                animator.SetTrigger("chefAtt");
+            }
+
             monsters[targetMonster].DecreaseHP(card.singleDamage);
             if(monsters[targetMonster].currentHP <= 0)
             {
@@ -351,7 +358,13 @@ public class BattleManager : MonoBehaviour
         if(card.aoeDamage > 0)
         {
             Debug.Log("Dealing " + card.aoeDamage + " damage to all enemies.");
-            foreach(int monsterID in monsters.Keys)
+            Animator animator = boardManagerObject.GetComponent<BoardManager>().ChefGroup.GetComponent<Animator>();
+            if (animator != null)
+            {
+                Debug.Log("animating");
+                animator.SetTrigger("chefAtt");
+            }
+            foreach (int monsterID in monsters.Keys)
             {
                 monsters[monsterID].DecreaseHP(card.aoeDamage);
                 if(monsters[monsterID].currentHP <= 0)
@@ -542,6 +555,7 @@ public class BattleManager : MonoBehaviour
             stunnedTurns--;
         }
     }
+
 
     private void HandleEndOfPlayerTurn()
     {
