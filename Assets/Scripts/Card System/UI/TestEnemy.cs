@@ -46,6 +46,7 @@ public class TestEnemy : MonoBehaviour, IDropHandler
             enemyImage.color = Color.white;
         }
     }
+
     public void OnDrop(PointerEventData eventData)
     {
         GameObject tempCard = GameObject.Find("SelectedCard");

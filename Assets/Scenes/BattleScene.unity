@@ -121,18 +121,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &63452592 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5107924383713781679, guid: 4536b77fed8d947629106e2e33720b78,
-    type: 3}
-  m_PrefabInstance: {fileID: 2070110336}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4a3f5927004d482ab1d09ead3f25ebf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &75179752
 GameObject:
   m_ObjectHideFlags: 0
@@ -904,18 +892,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 544655256}
   m_CullTransparentMesh: 0
---- !u!114 &557262704 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5092142720461753931, guid: 4536b77fed8d947629106e2e33720b78,
-    type: 3}
-  m_PrefabInstance: {fileID: 2070110336}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &557821408
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3190,11 +3166,11 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 2070110336}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1583738865
+--- !u!114 &1583738865 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 5720834147096859143, guid: 4536b77fed8d947629106e2e33720b78,
+    type: 3}
+  m_PrefabInstance: {fileID: 2070110336}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1583738864}
   m_Enabled: 1
@@ -3202,11 +3178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5eab385953e29b439223695584d09fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nameText: {fileID: 1602143179}
-  hpText: {fileID: 0}
-  healthBar: {fileID: 63452592}
-  enemyImage: {fileID: 557262704}
-  boardManageGameObject: {fileID: 1806896751}
 --- !u!95 &1583738866
 Animator:
   serializedVersion: 3
@@ -3232,18 +3203,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 2070110336}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1602143179 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6103286010250950602, guid: 4536b77fed8d947629106e2e33720b78,
-    type: 3}
-  m_PrefabInstance: {fileID: 2070110336}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1627007664
 GameObject:
   m_ObjectHideFlags: 0
@@ -4432,6 +4391,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 5720834147096859143, guid: 4536b77fed8d947629106e2e33720b78,
+        type: 3}
+      propertyPath: boardManageGameObject
+      value: 
+      objectReference: {fileID: 1806896751}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4536b77fed8d947629106e2e33720b78, type: 3}
 --- !u!1 &2072337367
