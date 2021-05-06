@@ -14,9 +14,6 @@ public class BoardManager : MonoBehaviour, IUIManager
     public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
     public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
 
-
-    
-
     //-----------------
     // member variables
     //-----------------
@@ -37,8 +34,9 @@ public class BoardManager : MonoBehaviour, IUIManager
     public GameObject ChefGroup;
 
     // variables used only to display information to the player
-    [SerializeField] private Text chefHPText;
-    [SerializeField] private Text chefManaText;
+    [SerializeField] private HealthBar chefHealthBar;
+    [SerializeField] private ManaBar chefManaBar;
+
     [SerializeField] private Text chefBlockText;
     [SerializeField] private Text deckCountText;
     [SerializeField] private Text discardPileCountText;
@@ -77,9 +75,11 @@ public class BoardManager : MonoBehaviour, IUIManager
         numCardsInDiscardPile = 0;
         playerStunned = false;
 
-        chefHPText.text = "HP: #";
-        chefManaText.text = "Mana: #";
-        chefBlockText.text = "Blocking 0% damage";
+        chefHealthBar.setMaxHealth(PlayerStats.Instance.GetMaxHealth());
+        chefHealthBar.setHealth(PlayerStats.Instance.GetHealth());
+        chefManaBar.setMaxMana(PlayerStats.Instance.GetMaxGlobalMana());
+        chefManaBar.setMana(PlayerStats.Instance.GetGlobalMana());
+        chefBlockText.text = "0%";
         deckCountText.text = numCardsInDeck.ToString();
         discardPileCountText.text = numCardsInDiscardPile.ToString();
         stunIndicatorImage.enabled = false;
@@ -137,17 +137,19 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
-        chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
+        chefHealthBar.setMaxHealth(maxHealth);
+        chefHealthBar.setHealth(currentHealth);
     }
 
     public void UpdatePlayerMana(int maxMana, int currentMana)
     {
-        chefManaText.text = "Mana: " + currentMana + " / " + maxMana;
+        chefManaBar.setMaxMana(maxMana);
+        chefManaBar.setMana(currentMana);
     }
 
     public void UpdatePlayerBlockPercent(float blockPercent)
     {
-        chefBlockText.text = "Blocking " + (blockPercent * 100) + "% of damage";
+        chefBlockText.text = (blockPercent * 100) + "%";
     }
 
     public void UpdatePlayerStunStatus(bool stunned) {
@@ -294,7 +296,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void AddEnemy(int monsterID, Monster monster)
     {
         enemy.SetNameText(monster.name);
-        enemy.SetHPText(monster.maxHP, monster.currentHP);
+        enemy.SetHealthBar(monster.maxHP, monster.currentHP);
     }
 
     public void RemoveEnemy(int monsterID)
@@ -304,7 +306,7 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth)
     {
-        enemy.SetHPText(maxHealth, currentHealth);
+        enemy.SetHealthBar(maxHealth, currentHealth);
     }
 
     public void UpdateEnemyStunStatus(int monsterID, bool stunned)

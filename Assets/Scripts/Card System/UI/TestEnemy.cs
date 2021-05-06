@@ -9,6 +9,7 @@ public class TestEnemy : MonoBehaviour, IDropHandler
 {
     [SerializeField] private Text nameText;
     [SerializeField] private Text hpText;
+    [SerializeField] private HealthBar healthBar;
     [SerializeField] private Image enemyImage;
     [SerializeField] private GameObject boardManageGameObject;
 
@@ -19,7 +20,19 @@ public class TestEnemy : MonoBehaviour, IDropHandler
 
     public void SetHPText(int maxHP, int hp)
     {
-        hpText.text = "HP: " + hp.ToString() + " / " + maxHP.ToString();;
+        if(hpText != null)
+        {
+            hpText.text = "HP: " + hp.ToString() + " / " + maxHP.ToString();
+        }
+    }
+
+    public void SetHealthBar(int maxHP, int hp)
+    {
+        if(healthBar != null)
+        {
+            healthBar.setMaxHealth(maxHP);
+            healthBar.setHealth(hp);
+        }
     }
 
     public void ToggleStunned(bool stunned)
