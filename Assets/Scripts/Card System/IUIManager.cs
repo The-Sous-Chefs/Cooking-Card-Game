@@ -43,7 +43,7 @@ public interface IUIManager
     void PutCardInHand(int cardID);
 
     void RemoveCardFromHand(int cardID);
-    
+
     void PutCardInDeck(int cardID);
 
     void RemoveCardFromDeck(int cardID);
