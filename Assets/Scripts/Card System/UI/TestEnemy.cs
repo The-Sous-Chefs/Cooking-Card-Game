@@ -12,6 +12,12 @@ public class TestEnemy : MonoBehaviour, IDropHandler
     [SerializeField] private HealthBar healthBar;
     [SerializeField] private Image enemyImage;
     [SerializeField] private GameObject boardManageGameObject;
+    private int id;
+
+    void Awake()
+    {
+        id = -1;
+    }
 
     public void SetNameText(string name)
     {
@@ -50,7 +56,37 @@ public class TestEnemy : MonoBehaviour, IDropHandler
     public void OnDrop(PointerEventData eventData)
     {
         GameObject tempCard = GameObject.Find("SelectedCard");
-        boardManageGameObject.GetComponent<BoardManager>().playCardByID(tempCard.transform.GetChild(0).GetComponent<CardUI>().cardID);
+        Debug.Assert(
+                id != -1,
+                "A card is being played on a monster whose UI representation " +
+                "didn't have an ID set!"
+        );
+        if(boardManageGameObject != null)
+        {
+            BoardManager boardManager = boardManageGameObject.GetComponent<BoardManager>();
+            if(boardManager != null)
+            {
+                boardManager.playCardByID(
+                        tempCard.transform.GetChild(0).GetComponent<CardUI>().cardID,
+                        id
+                );
+            }
+        }
         //Destroy(tempCard);
+    }
+
+    public void SetID(int newID)
+    {
+        id = newID;
+    }
+
+    public int GetID()
+    {
+        return id;
+    }
+
+    public void SetBoardManager(BoardManager boardManager)
+    {
+        boardManageGameObject = boardManager.gameObject;
     }
 }

@@ -84,6 +84,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5276261411568105492}
   - component: {fileID: 5720834147096859143}
+  - component: {fileID: 1531363909428802253}
   m_Layer: 5
   m_Name: Enemy
   m_TagString: Untagged
@@ -130,6 +131,25 @@ MonoBehaviour:
   healthBar: {fileID: 5107924383713781679}
   enemyImage: {fileID: 5092142720461753931}
   boardManageGameObject: {fileID: 0}
+--- !u!95 &1531363909428802253
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5276261411568105493}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2fc95ec9929bc3a41b328b17e5cbf506, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &8440432450310614869
 GameObject:
   m_ObjectHideFlags: 0

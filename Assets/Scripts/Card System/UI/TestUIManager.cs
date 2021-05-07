@@ -115,7 +115,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
         Debug.Assert((currentCardIndex >= 0) && (currentCardIndex < cardsInHand.Count));
         if(CardPlayedEvent != null)
         {
-            CardPlayedEvent(cardsInHand[currentCardIndex]);
+            CardPlayedEvent(cardsInHand[currentCardIndex], Constants.TEMPORARY_SINGLE_ENEMY_ID);
         }
     }
 
@@ -127,7 +127,7 @@ public class TestUIManager : MonoBehaviour, IUIManager
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
         if(BasicAbilityUsedEvent != null)
         {
-            BasicAbilityUsedEvent(abilityID);
+            BasicAbilityUsedEvent(abilityID, Constants.TEMPORARY_SINGLE_ENEMY_ID);
         }
     }
 

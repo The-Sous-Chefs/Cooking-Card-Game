@@ -12,12 +12,14 @@ public class DCCard
     //-----------------
 
     public int cardID          { get; }
+    public int targetEnemyID   { get; }
     public int cooldownCounter { get; private set; }
 
-    public DCCard(int cardID, int cooldownCounter)
+    public DCCard(int cardID, int targetEnemyID, int cooldownCounter)
     {
         Debug.Assert(cooldownCounter > 0);
         this.cardID = cardID;
+        this.targetEnemyID = targetEnemyID;
         this.cooldownCounter = cooldownCounter;
     }
 
@@ -99,7 +101,18 @@ public class BattleManager : MonoBehaviour
         // FIXME: Do it dynamically!
         monsters = new Dictionary<int, Monster>();
         monsters.Add(
-                Constants.TEMPORARY_SINGLE_ENEMY_ID,
+                0,
+                new Monster("demoMonster", 1, 50, 3, 1,
+                        new MonsterAction[4] {
+                                MonsterAction.ATTACK,
+                                MonsterAction.ATTACK,
+                                MonsterAction.ATTACK,
+                                MonsterAction.SKILL
+                        }
+                )
+        );
+        monsters.Add(
+                1,
                 new Monster("demoMonster", 1, 50, 3, 1,
                         new MonsterAction[4] {
                                 MonsterAction.ATTACK,
@@ -203,7 +216,7 @@ public class BattleManager : MonoBehaviour
         boardManager.PutCardInDiscardPile(discardedCard);
     }
 
-    private void AddCardToDCCS(int cardID)
+    private void AddCardToDCCS(int cardID, int targetEnemyID)
     {
         Debug.Assert(dccs.Count < Constants.DCCS_SIZE, "Tried to add a card to DCCS when it was full!");
         int slot = 0;
@@ -214,7 +227,7 @@ public class BattleManager : MonoBehaviour
             {
                 foundSlot = true;
                 Card dcCard = CardDatabase.Instance.GetCardByID(cardID);
-                dccs.Add(slot, new DCCard(cardID, dcCard.turnsInPlay));
+                dccs.Add(slot, new DCCard(cardID, targetEnemyID, dcCard.turnsInPlay));
                 boardManager.PutCardInDCCS(cardID, dcCard.turnsInPlay, slot);
             }
             slot++;
@@ -248,7 +261,7 @@ public class BattleManager : MonoBehaviour
     }
 
     // NOTE: This method used to be public and called directly by a button
-    private void PlayCard(int cardID)
+    private void PlayCard(int cardID, int targetEnemyID)
     {
         // only if remaining mana is affordable and space exists for Delayed or
         // Continuous cards
@@ -268,7 +281,7 @@ public class BattleManager : MonoBehaviour
                 case CardType.IMMEDIATE:
                     hand.Remove(cardID);
                     boardManager.RemoveCardFromHand(cardID);
-                    ResolveCardEffects(cardToPlay);
+                    ResolveCardEffects(cardToPlay, targetEnemyID);
                     discardPile.Add(cardID);
                     boardManager.PutCardInDiscardPile(cardID);
                     break;
@@ -278,7 +291,7 @@ public class BattleManager : MonoBehaviour
                     // same behavior for both card types
                     hand.Remove(cardID);
                     boardManager.RemoveCardFromHand(cardID);
-                    AddCardToDCCS(cardID);
+                    AddCardToDCCS(cardID, targetEnemyID);
                     break;
                 
                 case CardType.BASIC:
@@ -287,7 +300,7 @@ public class BattleManager : MonoBehaviour
                         // nothing to do related to the hand, but basic abilities
                         // are implemented just like any other card in terms of
                         // effects
-                        ResolveCardEffects(cardToPlay);
+                        ResolveCardEffects(cardToPlay, targetEnemyID);
                         cantUseBasicAbility = true;
                         boardManager.DeactivateBasicAbilities();
                     }
@@ -304,11 +317,11 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void ResolveCardEffects(Card card)
+    private void ResolveCardEffects(Card card, int targetEnemyID)
     {
-        TargettedDamageHandler(card, Constants.TEMPORARY_SINGLE_ENEMY_ID);
+        TargettedDamageHandler(card, targetEnemyID);
         AOEDamageHandler(card);
-        StunHandler(card, Constants.TEMPORARY_SINGLE_ENEMY_ID);
+        StunHandler(card, targetEnemyID);
         HealHandler(card);
         ManaRegenHandler(card);
         BlockHandler(card);
@@ -319,8 +332,7 @@ public class BattleManager : MonoBehaviour
 
     private bool TargettedDamageHandler(Card card, int targetMonster)
     {
-        Debug.Assert(new List<int>(monsters.Keys).Contains(targetMonster));
-        if(card.singleDamage > 0)
+        if((card.singleDamage > 0) && monsters.ContainsKey(targetMonster))
         {
             Debug.Log("Dealing " + card.singleDamage + " damage to " + monsters[targetMonster].name + ".");
             Animator animator = boardManagerObject.GetComponent<BoardManager>().ChefGroup.GetComponent<Animator>();
@@ -333,6 +345,7 @@ public class BattleManager : MonoBehaviour
             monsters[targetMonster].DecreaseHP(card.singleDamage);
             if(monsters[targetMonster].currentHP <= 0)
             {
+                monsters.Remove(targetMonster);
                 boardManager.RemoveEnemy(targetMonster);
             }
             else
@@ -369,6 +382,7 @@ public class BattleManager : MonoBehaviour
                 monsters[monsterID].DecreaseHP(card.aoeDamage);
                 if(monsters[monsterID].currentHP <= 0)
                 {
+                    monsters.Remove(monsterID);
                     boardManager.RemoveEnemy(monsterID);
                 }
                 else
@@ -391,7 +405,7 @@ public class BattleManager : MonoBehaviour
 
     private bool StunHandler(Card card, int targetMonster)
     {
-        if(card.stuns)
+        if(card.stuns && monsters.ContainsKey(targetMonster))
         {
             Debug.Log("Stunning the enemy");
             monsters[targetMonster].BecomeStunned();
@@ -516,12 +530,12 @@ public class BattleManager : MonoBehaviour
                 {
                     if(cooldownOver)
                     {
-                        ResolveCardEffects(dccsCard);
+                        ResolveCardEffects(dccsCard, dccs[i].targetEnemyID);
                     }
                 }
                 else if(dccsCard.cardType == CardType.CONTINUOUS)
                 {
-                    ResolveCardEffects(dccsCard);
+                    ResolveCardEffects(dccsCard, dccs[i].targetEnemyID);
                 }
 
                 if(cooldownOver)
@@ -618,6 +632,7 @@ public class BattleManager : MonoBehaviour
             monsters[monsterID].DecreaseHP(actualDamage * -1);
             if(monsters[monsterID].currentHP <= 0)
             {
+                monsters.Remove(monsterID);
                 boardManager.RemoveEnemy(monsterID);
             }
             else
@@ -628,12 +643,9 @@ public class BattleManager : MonoBehaviour
                         monsters[monsterID].currentHP
                 );
             }
-            foreach(int innerMonsterID in monsters.Keys)
+            if(CheckIfAllEnemiesDefeated())
             {
-                if(CheckIfAllEnemiesDefeated())
-                {
-                    boardManager.WinGame();
-                }
+                boardManager.WinGame();
             }
         }
     }
