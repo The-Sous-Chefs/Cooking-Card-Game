@@ -282,6 +282,8 @@ public class BoardManager : MonoBehaviour, IUIManager
                 {
                     // countText.text of "" would indicate that there's not a card in that slot
                     Debug.Assert(countText.text != "");
+                    // make sure we're setting a valid countDown
+                    Debug.Assert(newCountDown >= 0);
                     countText.text = newCountDown.ToString();
                 }
             }
