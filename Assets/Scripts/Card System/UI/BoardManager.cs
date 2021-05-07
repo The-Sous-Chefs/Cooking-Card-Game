@@ -134,7 +134,10 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void RestartBattle()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("TScene"));
+        SceneManager.UnloadSceneAsync("BattleScene");
+        //SceneManager.LoadScene("TScene");
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     //-------------------

@@ -1,1 +1,0 @@
-This is where I'd put a world generation system, if I had one!
