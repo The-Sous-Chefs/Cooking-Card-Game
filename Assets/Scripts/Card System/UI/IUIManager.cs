@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void CardPlayedDelegate(int cardID);
-public delegate void BasicAbilityUsedDelegate(int abilityID);
+public delegate void CardPlayedDelegate(int cardID, int targetEnemyID);
+public delegate void BasicAbilityUsedDelegate(int abilityID, int targetEnemyID);
 public delegate void PlayerTurnEndedDelgate();
 
 /*
@@ -43,7 +43,7 @@ public interface IUIManager
     void PutCardInHand(int cardID);
 
     void RemoveCardFromHand(int cardID);
-    
+
     void PutCardInDeck(int cardID);
 
     void RemoveCardFromDeck(int cardID);

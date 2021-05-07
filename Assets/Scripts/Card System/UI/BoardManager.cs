@@ -20,19 +20,22 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     // variables the UI needs to keep track of to work
     [SerializeField] private GameObject card;
+    [SerializeField] private GameObject enemy;
     [SerializeField] private GameObject[] dccsSlots = new GameObject[Constants.DCCS_SIZE];  // if more than 5 are added in inspector, they'll be ignored
     private List<CardUI> hand;
     private Dictionary<int, GameObject> dccs;
+    private Dictionary<int, TestEnemy> enemies;
     private int numCardsInDeck;
     private int numCardsInDiscardPile;
     private bool playerStunned;
-    // FIXME: Make enemies dynamically (See the comments about the TestEnemy in
-    //        TestUIManager.cs)
-    [SerializeField] TestEnemy enemy;
+    //For animation
+    //Will need to refactor chef, simply pass in the whole group, not so many variable.
+    public GameObject ChefGroup;
 
     // variables used only to display information to the player
-    [SerializeField] private Text chefHPText;
-    [SerializeField] private Text chefManaText;
+    [SerializeField] private HealthBar chefHealthBar;
+    [SerializeField] private ManaBar chefManaBar;
+
     [SerializeField] private Text chefBlockText;
     [SerializeField] private Text deckCountText;
     [SerializeField] private Text discardPileCountText;
@@ -47,7 +50,10 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private GameObject loseMessage;
 
     [SerializeField] private Transform handContainer;
+    [SerializeField] private Transform enemyContainer;
+
     [SerializeField] private Canvas canvas;
+
 
     void Awake()
     {
@@ -65,14 +71,17 @@ public class BoardManager : MonoBehaviour, IUIManager
                 countText.text = "";
             }
         }
+        enemies = new Dictionary<int, TestEnemy>();
 
         numCardsInDeck = 0;
         numCardsInDiscardPile = 0;
         playerStunned = false;
 
-        chefHPText.text = "HP: #";
-        chefManaText.text = "Mana: #";
-        chefBlockText.text = "Blocking 0% damage";
+        chefHealthBar.setMaxHealth(PlayerStats.Instance.GetMaxHealth());
+        chefHealthBar.setHealth(PlayerStats.Instance.GetHealth());
+        chefManaBar.setMaxMana(PlayerStats.Instance.GetMaxGlobalMana());
+        chefManaBar.setMana(PlayerStats.Instance.GetGlobalMana());
+        chefBlockText.text = "0%";
         deckCountText.text = numCardsInDeck.ToString();
         discardPileCountText.text = numCardsInDiscardPile.ToString();
         stunIndicatorImage.enabled = false;
@@ -86,15 +95,40 @@ public class BoardManager : MonoBehaviour, IUIManager
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
         if(BasicAbilityUsedEvent != null)
         {
-            BasicAbilityUsedEvent(abilityID);
+            BasicAbilityUsedEvent(abilityID, Constants.TEMPORARY_SINGLE_ENEMY_ID);
         }
+    }
+
+
+    // don't know why the timer wait is not working here.
+    IEnumerator TimerHang()
+    {
+        Debug.Log("start timer");
+        yield return new WaitForSeconds(5);
     }
 
     public void EndPlayerTurn()
     {
         if(PlayerTurnEndedEvent != null)
         {
+            foreach(int enemyID in enemies.Keys)
+            {
+                Animator animator = enemies[enemyID].gameObject.GetComponent<Animator>();
+                if (animator != null)
+                {
+                    Debug.Log("animating");
+                    animator.SetTrigger("attack");
+                }
+            }
+            StartCoroutine(TimerHang());
+            Debug.Log("end timer");
             PlayerTurnEndedEvent();
+
+            // if (animator != null)
+            // {
+            //    // animator.ResetTrigger("attack");
+            // }
+
         }
     }
 
@@ -112,17 +146,19 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
-        chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
+        chefHealthBar.setMaxHealth(maxHealth);
+        chefHealthBar.setHealth(currentHealth);
     }
 
     public void UpdatePlayerMana(int maxMana, int currentMana)
     {
-        chefManaText.text = "Mana: " + currentMana + " / " + maxMana;
+        chefManaBar.setMaxMana(maxMana);
+        chefManaBar.setMana(currentMana);
     }
 
     public void UpdatePlayerBlockPercent(float blockPercent)
     {
-        chefBlockText.text = "Blocking " + (blockPercent * 100) + "% of damage";
+        chefBlockText.text = (blockPercent * 100) + "%";
     }
 
     public void UpdatePlayerStunStatus(bool stunned) {
@@ -138,6 +174,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
         hand.Add(newCardInUI.GetComponent<CardUI>());
+        //newCardInUI.GetComponent<FadeAnimation>().startFading();
     }
 
     public void RemoveCardFromHand(int cardID)
@@ -245,6 +282,8 @@ public class BoardManager : MonoBehaviour, IUIManager
                 {
                     // countText.text of "" would indicate that there's not a card in that slot
                     Debug.Assert(countText.text != "");
+                    // make sure we're setting a valid countDown
+                    Debug.Assert(newCountDown >= 0);
                     countText.text = newCountDown.ToString();
                 }
             }
@@ -267,23 +306,38 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void AddEnemy(int monsterID, Monster monster)
     {
-        enemy.SetNameText(monster.name);
-        enemy.SetHPText(monster.maxHP, monster.currentHP);
+        Debug.Assert(enemies.Count < Constants.MAX_ENEMIES);
+        GameObject newEnemy = Instantiate(enemy, enemyContainer);
+        newEnemy.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        TestEnemy enemyUI = newEnemy.GetComponent<TestEnemy>();
+        if(enemyUI != null)
+        {
+            enemies.Add(monsterID, enemyUI);
+            enemyUI.SetBoardManager(this);
+            enemyUI.SetID(monsterID);
+            enemyUI.SetNameText(monster.name);
+            enemyUI.SetHealthBar(monster.maxHP, monster.currentHP);
+        }
     }
 
     public void RemoveEnemy(int monsterID)
     {
-        // do nothing, since there's only one sort of hard-coded enemy at the moment
+        Debug.Assert(enemies.ContainsKey(monsterID));
+        TestEnemy enemyUI = enemies[monsterID];
+        enemies.Remove(monsterID);
+        Destroy(enemyUI.gameObject);
     }
 
     public void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth)
     {
-        enemy.SetHPText(maxHealth, currentHealth);
+        Debug.Assert(enemies.ContainsKey(monsterID));
+        enemies[monsterID].SetHealthBar(maxHealth, currentHealth);
     }
 
     public void UpdateEnemyStunStatus(int monsterID, bool stunned)
     {
-        enemy.ToggleStunned(stunned);
+        Debug.Assert(enemies.ContainsKey(monsterID));
+        enemies[monsterID].ToggleStunned(stunned);
     }
 
     public void WinGame()
@@ -296,8 +350,11 @@ public class BoardManager : MonoBehaviour, IUIManager
         loseMessage.SetActive(true);
     }
 
-    public void playCardByID(int cardId)
+    public void playCardByID(int cardId, int targetEnemyID)
     {
-        CardPlayedEvent(cardId);
+        if(CardPlayedEvent != null)
+        {
+            CardPlayedEvent(cardId, targetEnemyID);
+        }
     }
 }
