@@ -13,8 +13,9 @@ public class RoadGen
     public float maxRoadLength;
     public float roadDelta;
     public int recDepth;
+    public List<Vector2> points;
 
-    public RoadGen(int length, TerrainData tData, float padding, float minRoadLength, float maxRoadLength, float roadDelta, int recDepth)
+    public RoadGen(int length, TerrainData tData, float padding, float minRoadLength, float maxRoadLength, float roadDelta, int recDepth, List<Vector2> points)
     {
         this.length = length;
         this.tData = tData;
@@ -23,6 +24,7 @@ public class RoadGen
         this.maxRoadLength = maxRoadLength;
         this.roadDelta = roadDelta;
         this.recDepth = recDepth;
+        this.points = points;
     }
 
     public RoadGraph GenerateRoadGraph()
@@ -47,7 +49,14 @@ public class RoadGen
         rGraph.AddEdge(new Vector3(0f + padding, 0f, 0f + padding), new Vector3(length - padding, 0f, 0f + padding), true);
         rGraph.AddEdge(new Vector3(length - padding, 0f, length - padding), new Vector3(0f + padding, 0f, length - padding), true);
         rGraph.AddEdge(new Vector3(length - padding, 0f, length - padding), new Vector3(length - padding, 0f, 0f + padding), true);
-        for (int i = 0; i < 10; i++)
+        foreach (var p in points)
+        {
+            if (p.x < 0 || p.y < 0 || p.x > length || p.y > length)
+                continue;
+            float h = Random.Range(-2 * Mathf.PI, 0);
+            PrimaryLRecurse(p.x + 1, p.y + Mathf.Epsilon + 1, h, rGraph, recDepth);
+        }
+        for (int i = 0; i < 50; i++)
         {
             x = Random.Range(padding, length - padding);
             y = Random.Range(padding, length - padding);
@@ -77,7 +86,7 @@ public class RoadGen
 
                 var current = new Vector3(start.x, start.y, start.z);
 
-                int maxSteps = 1000;
+                int maxSteps = 100;
                 while (maxSteps --> 0)
                 {
                     Vector3 next = NextStep(start, dest, current, tStep);
@@ -85,6 +94,7 @@ public class RoadGen
                     if (next.Equals(dest)) break;
                     current = next;
                 }
+                if (maxSteps == 0) Debug.Log("HWOHWKj");
             }
         }
 
@@ -99,6 +109,25 @@ public class RoadGen
         if ((b-current).magnitude <= stepSize)
         {
             return b;
+        }
+        if (ClosestPoint(b) == -1)
+        {
+            var center = points[1];
+            var a2 = new Vector2(a.x, a.z);
+            var b2 = new Vector2(b.x, b.z);
+            var current2 = new Vector2(current.x, current.z);
+            if (Mathf.Abs(Vector2.Dot((center - a2).normalized, (center - b2).normalized)) > 0.85)
+            {
+                var next = dir + current;
+                next.y = tData.GetInterpolatedHeight(next.x / tData.heightmapResolution, next.z / tData.heightmapResolution);
+                return dir + current;
+            }
+            var nextPos = Vector2.MoveTowards(current2, b2, stepSize);
+            var totalDeg = Vector2.Angle((a2 - center), (b2 - center));
+            var currentDeg = Vector2.Angle((nextPos - center), (b2 - center));
+            var currentRadius = (center - a2).magnitude * (1f - currentDeg / totalDeg) + (center - b2).magnitude * (currentDeg / totalDeg);
+            nextPos = (nextPos - center).normalized * currentRadius + center;
+            return new Vector3(nextPos.x, tData.GetInterpolatedHeight(nextPos.x / tData.heightmapResolution, nextPos.y / tData.heightmapResolution), nextPos.y);
         }
         float sDist = (current - a).magnitude;
         float fDist = (current - b).magnitude;
@@ -136,14 +165,44 @@ public class RoadGen
         return (minDevianceStep + dir) / 2;
     }
 
+    private int ClosestPoint(Vector2 point)
+    {
+        int min = 0;
+        float minVal = Mathf.Infinity;
+        for(int i = 0; i < points.Count; i++)
+        {
+            var p = points[i];
+            if ((p-point).magnitude < minVal)
+            {
+                minVal = (p - point).magnitude;
+                min = i;
+            }
+        }
+        return min;
+    }
     private void PrimaryLRecurse(float x, float y, float heading, RoadGraph rGraph, int depth)
     {
         if (depth < 0)
             return;
         depth--;
 
-        heading += Random.Range(-Mathf.PI / 8, Mathf.PI / 8);
-        float roadLength = Random.Range(minRoadLength, maxRoadLength);
+        var closest = ClosestPoint(new Vector2(x, y));
+
+        if (closest != 0)
+        {
+            heading += Random.Range(-Mathf.PI / 8, Mathf.PI / 8);
+        }
+
+
+        float roadLength;
+        if (closest == 0)
+        {
+            roadLength = Random.Range(minRoadLength, (minRoadLength + maxRoadLength) / 2f);
+        }
+        else
+        {
+            roadLength = Random.Range(minRoadLength, maxRoadLength);
+        }
 
         float xD = x + roadLength * Mathf.Cos(heading);
         float yD = y + roadLength * Mathf.Sin(heading);

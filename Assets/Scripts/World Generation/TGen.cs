@@ -46,10 +46,15 @@ public class TGen : MonoBehaviour
     public int buildingsLayer;
     public string buildingTag = "Building";
     public string roadTag = "Road";
+    public int spawnAttempts = 1000;
+    public GameObject[] spawnables;
+    public GameObject[] buildingSpawnables;
 
     [Space(10)]
     [Header("Extra")]
     public GameObject player;
+
+    List<Vector2> points;
 
 
     // Start is called before the first frame update
@@ -66,6 +71,7 @@ public class TGen : MonoBehaviour
         roadMeshObject.GetComponent<MeshFilter>().mesh = mesh;
         roadMeshObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         roadMeshObject.GetComponent<MeshRenderer>().material = roadMaterial;
+        points = new List<Vector2>();
         if (enableRandom)
         {
             offsetX = Random.Range(100f, 999f);
@@ -94,7 +100,7 @@ public class TGen : MonoBehaviour
 
     void GenerateRoads()
     {
-        RoadGen rGen = new RoadGen(length, GetComponent<Terrain>().terrainData, padding, minRoadLength, maxRoadLength, roadDelta, recDepth);
+        RoadGen rGen = new RoadGen(length, GetComponent<Terrain>().terrainData, padding, minRoadLength, maxRoadLength, roadDelta, recDepth, points);
         RoadGraph rGraph = rGen.GeneratePrimaryL();
         RoadGraph tGraph = rGen.TerrainAdapt(rGraph, terrainRoadStep);
         if (lineRender)
@@ -103,14 +109,21 @@ public class TGen : MonoBehaviour
             RoadLineRender(tGraph, new Color(255, 255, 255), "Terrain Roads");
         }
         GenerateMesh(tGraph);
+        for(int i = 0; i < points.Count; i++)
+        {
+            var p = points[i];
+            var s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            s.transform.position = new Vector3(p.x, i, p.y);
+            s.transform.localScale = new Vector3(10, 10, 10);
+        }
         GenerateBuildings(tGraph);
     }
 
     void GenerateBuildings(RoadGraph rGraph)
     {
-        foreach(var a in rGraph.graph.Keys)
+        foreach (var a in rGraph.graph.Keys)
         {
-            foreach(var b in rGraph.graph[a])
+            foreach (var b in rGraph.graph[a])
             {
                 float start = 0f;
                 float dest = (b - a).magnitude;
@@ -133,7 +146,7 @@ public class TGen : MonoBehaviour
                     cube.layer = buildingsLayer;
                     cube.transform.position = location + norm * scaling.x / 2f;
                     cube.transform.localScale = scaling;
-                    Collider[] obstacles = Physics.OverlapBox(cube.transform.position, cube.transform.localScale / 2f, cube.transform.rotation);
+                    Collider[] obstacles = Physics.OverlapBox(cube.transform.position, cube.transform.localScale / 2f + new Vector3(buildingClearance, buildingClearance, buildingClearance) / 3f, cube.transform.rotation);
                     var cubeCollider = cube.AddComponent<BoxCollider>();
                     foreach (var o in obstacles)
                     {
@@ -147,10 +160,62 @@ public class TGen : MonoBehaviour
                         }
                     }
                     if (found)
-                        cube.SetActive(true);
+                    {
+                        int objIndex = Random.Range(0, buildingSpawnables.Length);
+                        var objBuilding = buildingSpawnables[objIndex];
+                        location.y = tData.GetInterpolatedHeight(location.x / resL, location.y / resL);
+                        var rotation = objIndex == 0 ? Quaternion.identity : Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up);
+                        var inst = Instantiate(objBuilding, location, rotation);
+                        inst.transform.SetParent(buildings.transform);
+                        inst.tag = buildingTag;
+                        inst.layer = buildingsLayer;
+                        foreach (Transform t in inst.transform)
+                        {
+                            t.gameObject.tag = buildingTag;
+                            t.tag = buildingTag;
+                            t.gameObject.layer = buildingsLayer;
+                        }
+                        if (objIndex == 1)
+                        {
+                            inst.transform.localScale = new Vector3(10, 10, 10);
+                            location.y += 15;
+                            inst.transform.position = location;
+                        } else if (objIndex == 2)
+                        {
+                            inst.transform.localScale = new Vector3(5, 5, 5);
+                            location.y += 2.5f;
+                            inst.transform.position = location;
+                        }
+                        Destroy(cubeCollider);
+                        Destroy(cube);
+                        inst.SetActive(true);
+                        // cube.SetActive(true);
+                    }
 
                 }
 
+            }
+        }
+
+        GameObject terrainDecals = new GameObject();
+        for (int num = 0; num < spawnAttempts; num++)
+        {
+            float x = Random.Range(0f, resLength);
+            float y = Random.Range(0f, resLength);
+            int obj = Random.Range(0, spawnables.Length);
+            var spawn = spawnables[obj];
+            var collider = spawn.GetComponent<MeshCollider>();
+            var bounds = collider.sharedMesh.bounds;
+            var tData = GetComponent<Terrain>().terrainData;
+            var height = tData.GetInterpolatedHeight(x / resLength, y / resLength);
+            var objH = height + bounds.extents.y;
+            var center = new Vector3(x, objH, y);
+            var obstacles = Physics.OverlapBox(center, bounds.extents);
+            if (obstacles.Length <= 1)
+            {
+                var inst = Instantiate(spawn, new Vector3(x, height, y), Quaternion.identity);
+                inst.SetActive(true);
+                inst.transform.SetParent(terrainDecals.transform);
             }
         }
     }
@@ -247,7 +312,7 @@ public class TGen : MonoBehaviour
                     line.endWidth = .1f;
                     line.startColor = color;
                     line.endColor = color;
-                    line.SetPositions(new Vector3[] {a, b});
+                    line.SetPositions(new Vector3[] { a, b });
                     rendered.Add((a, b));
                     line.transform.SetParent(roadLines.transform);
                 }
@@ -260,8 +325,16 @@ public class TGen : MonoBehaviour
         Terrain terrain = GetComponent<Terrain>();
         TerrainData tData = terrain.terrainData;
 
+
         tData.heightmapResolution = resLength + 1;
         tData.size = new Vector3(length, depth, length);
+
+        for(int i = 0; i < 3; i++)
+        {
+            var x = Random.Range(.3f * resLength, .7f * resLength);
+            var y = Random.Range(.3f * resLength, .7f * resLength);
+            points.Add(new Vector2(x, y));
+        }
 
 
         float[,] heights = new float[resLength + 1, resLength + 1];
