@@ -34,10 +34,7 @@ public class TGen : MonoBehaviour
     public float maxRoadLength = 250f;
     public float roadDelta = 25f;
     public int recDepth = 7;
-<<<<<<< HEAD
     public Material roadMaterial;
-=======
->>>>>>> main
 
     [Space(10)]
     [Header("Building Generation")]
@@ -49,22 +46,15 @@ public class TGen : MonoBehaviour
     public int buildingsLayer;
     public string buildingTag = "Building";
     public string roadTag = "Road";
-<<<<<<< HEAD
     public int spawnAttempts = 1000;
     public GameObject[] spawnables;
     public GameObject[] buildingSpawnables;
-=======
->>>>>>> main
 
     [Space(10)]
     [Header("Extra")]
     public GameObject player;
 
-<<<<<<< HEAD
     List<Vector2> points;
-
-=======
->>>>>>> main
 
     // Start is called before the first frame update
     void Start()
@@ -79,11 +69,8 @@ public class TGen : MonoBehaviour
         mesh.Clear();
         roadMeshObject.GetComponent<MeshFilter>().mesh = mesh;
         roadMeshObject.GetComponent<MeshCollider>().sharedMesh = mesh;
-<<<<<<< HEAD
         roadMeshObject.GetComponent<MeshRenderer>().material = roadMaterial;
         points = new List<Vector2>();
-=======
->>>>>>> main
         if (enableRandom)
         {
             offsetX = Random.Range(100f, 999f);
