@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -954,16 +954,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5eab385953e29b439223695584d09fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< HEAD
-  hptxt: {fileID: 1192642095}
-  enmName: {fileID: 297908864}
-  playedCardUIPlaceHolder: {fileID: 0}
-  battleManager: {fileID: 0}
-=======
   nameText: {fileID: 297908864}
   hpText: {fileID: 1192642095}
+  healthBar: {fileID: 0}
   enemyImage: {fileID: 213496026}
->>>>>>> 465856082f05f0c713e9918b13892fdee9eed5c8
+  boardManageGameObject: {fileID: 185450210}
 --- !u!1 &216949494
 GameObject:
   m_ObjectHideFlags: 0
