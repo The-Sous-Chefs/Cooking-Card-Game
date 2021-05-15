@@ -173,7 +173,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
         hand.Add(newCardInUI.GetComponent<CardUI>());
-        GameObject.Find("placeHolder").transform.SetAsLastSibling();
+        GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
         //newCardInUI.GetComponent<FadeAnimation>().startFading();
     }
 
@@ -189,6 +189,7 @@ public class BoardManager : MonoBehaviour, IUIManager
                 break;
             }
         }
+        GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
     }
 
     public void PutCardInDeck(int cardID)

@@ -4279,6 +4279,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2066243274}
   - component: {fileID: 2066243275}
+  - component: {fileID: 2066243276}
   m_Layer: 5
   m_Name: CardsSet
   m_TagString: Untagged
@@ -4327,9 +4328,22 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 1
   m_CellSize: {x: 142.3042, y: 187.3376}
-  m_Spacing: {x: -70, y: 0}
+  m_Spacing: {x: -70, y: 1}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &2066243276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066243273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0c14f235cbefd140a033916bc47f372, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CardsSet: {fileID: 2066243273}
 --- !u!1001 &2070110336
 PrefabInstance:
   m_ObjectHideFlags: 0
