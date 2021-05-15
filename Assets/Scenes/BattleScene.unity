@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -959,6 +959,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1554687147}
     m_Modifications:
+    - target: {fileID: 684499785406009929, guid: 267e287d103dd4313820e27dea8b5847,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.65882355
+      objectReference: {fileID: 0}
+    - target: {fileID: 684499785406009929, guid: 267e287d103dd4313820e27dea8b5847,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684499785406009929, guid: 267e287d103dd4313820e27dea8b5847,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.9151516
+      objectReference: {fileID: 0}
+    - target: {fileID: 684499785406009929, guid: 267e287d103dd4313820e27dea8b5847,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3780046830651416824, guid: 267e287d103dd4313820e27dea8b5847,
         type: 3}
       propertyPath: m_AnchorMax.x
