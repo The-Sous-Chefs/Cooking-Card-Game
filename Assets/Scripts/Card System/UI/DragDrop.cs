@@ -14,6 +14,7 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
     private Vector2 originPos;
     private Color originColor;
 
+
     private void Awake()
     {
         canDrag = true;
@@ -34,7 +35,10 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         {
             rectTransform.localScale = (canDrag) ? new Vector3(1.1f, 1.1f, 1.1f) : new Vector3(2.2f, 2.2f, 2.2f);
             //rectTransform.anchoredPosition += new Vector2(-80, 0);
-            rectTransform.anchoredPosition += new Vector2(0, 100);
+            //rectTransform.anchoredPosition += new Vector2(0, 100);
+            GameObject.Find("placeHolder").transform.SetSiblingIndex(rectTransform.GetSiblingIndex()+1);
+
+
         }
     }
 
@@ -43,8 +47,9 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         if (GameObject.Find("SelectedCard").transform.childCount == 0)
         {   
             //rectTransform.anchoredPosition -= new Vector2(-80, 0);
-            rectTransform.anchoredPosition -= new Vector2(0, 100);
+            //rectTransform.anchoredPosition -= new Vector2(0, 100);
             rectTransform.localScale = new Vector3(1f, 1f, 1f);
+            GameObject.Find("placeHolder").transform.SetAsLastSibling();
         }
 
     }
@@ -81,6 +86,7 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
             GetComponent<Image>().color = originColor;
             rectTransform.anchoredPosition = originPos;
             transform.SetParent(GameObject.Find("CardsSet").transform);
+            GameObject.Find("placeHolder").transform.SetAsLastSibling();
         }
     }
 

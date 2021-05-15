@@ -173,6 +173,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
         hand.Add(newCardInUI.GetComponent<CardUI>());
+        GameObject.Find("placeHolder").transform.SetAsLastSibling();
         //newCardInUI.GetComponent<FadeAnimation>().startFading();
     }
 
