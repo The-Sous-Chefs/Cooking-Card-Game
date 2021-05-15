@@ -9,7 +9,7 @@ Name8,2,Immediate ,,3,,3,,,,,,,,Deal 3 damage to an enemy and recover 3 HP.
 Name9,3,Immediate ,,,,10,,,,,,,,Recover 10 HP.
 Name10,3,Immediate ,,,5,,,,,,,,,Deal 5 damage to all enemies.
 Second Wind,5,Continuous,3,,,3,1,,,,,,,"For 3 turns, recover 3 HP and with draw 1 extra card."
-Ultimate Technique,10,Continuous,4,,4,4,,,,,,,,"For 4 turns, deal 4 damage to all enemies and recover 4 HP."
+Ultimate Jinx,10,Continuous,4,,4,4,,,,,,,,"For 4 turns, deal 4 damage to all enemies and recover 4 HP."
 Name13,5,Continuous,2,,,,,,,,X,,,"For 2 turns, stun an enemy, preventing it from moving."
 Stone Resolve,10,Continuous,3,,,5,,,,0.4,,,,"For 3 turns, block 40% of incoming damage and recover 5 HP."
 Name15,3,Delayed,2,12,,,,,,,,,,"After 2 turns, deal 12 damage to an enemy."
