@@ -99,7 +99,6 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
-
     // don't know why the timer wait is not working here.
     IEnumerator TimerHang()
     {
