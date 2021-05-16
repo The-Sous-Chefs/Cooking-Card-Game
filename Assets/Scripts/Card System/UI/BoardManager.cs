@@ -309,7 +309,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         Debug.Assert(enemies.Count < Constants.MAX_ENEMIES);
         GameObject newEnemy = Instantiate(enemy, enemyContainer);
-        newEnemy.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        newEnemy.transform.localScale = new Vector3(0.45f, 0.45f, 0.45f);
         TestEnemy enemyUI = newEnemy.GetComponent<TestEnemy>();
         if(enemyUI != null)
         {
