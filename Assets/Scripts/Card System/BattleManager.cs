@@ -300,7 +300,7 @@ public class BattleManager : MonoBehaviour
                         // nothing to do related to the hand, but basic abilities
                         // are implemented just like any other card in terms of
                         // effects
-                        ResolveCardEffects(cardToPlay, targetEnemyID);
+                        ResolveCardEffectsNoTarget(cardToPlay);
                         cantUseBasicAbility = true;
                         boardManager.DeactivateBasicAbilities();
                     }
@@ -319,9 +319,34 @@ public class BattleManager : MonoBehaviour
 
     private void ResolveCardEffects(Card card, int targetEnemyID)
     {
-        TargettedDamageHandler(card, targetEnemyID);
+        if(targetEnemyID != Constants.NO_TARGET)
+        {
+            // FIXME: This assertion should be here, but it can't be at the
+            //        moment, since all cards need to be dragged onto an enemy
+            //        to be played, which makes their target that enemy. Making
+            //        it possible to play cards that don't need targets by
+            //        dragging them anywhere would fix this.
+            // Debug.Assert(card.needsTarget);
+            TargettedDamageHandler(card, targetEnemyID);
+            AOEDamageHandler(card);
+            StunHandler(card, targetEnemyID);
+            HealHandler(card);
+            ManaRegenHandler(card);
+            BlockHandler(card);
+            // discard before drawing, in case of cards that say discard X, then draw Y
+            DiscardHandler(card);
+            DrawHandler(card);
+        }
+        else
+        {
+            ResolveCardEffectsNoTarget(card);
+        }
+    }
+
+    private void ResolveCardEffectsNoTarget(Card card)
+    {
+        Debug.Assert(!card.needsTarget);
         AOEDamageHandler(card);
-        StunHandler(card, targetEnemyID);
         HealHandler(card);
         ManaRegenHandler(card);
         BlockHandler(card);

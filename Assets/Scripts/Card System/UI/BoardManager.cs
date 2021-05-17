@@ -103,7 +103,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
         if(BasicAbilityUsedEvent != null)
         {
-            BasicAbilityUsedEvent(abilityID, Constants.TEMPORARY_SINGLE_ENEMY_ID);
+            BasicAbilityUsedEvent(abilityID, Constants.NO_TARGET);
         }
     }
 

@@ -38,7 +38,5 @@ public static class Constants
     // UI-related constants
     public static string DCCS_CARD_HOLDER_NAME = "CardHolder";
     public static string DCCS_COUNT_NAME = "Count";
-
-    // temporary constants
-    public static int TEMPORARY_SINGLE_ENEMY_ID = 0;
+    public static int NO_TARGET = -1;
 }
