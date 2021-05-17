@@ -34,8 +34,6 @@ public interface IUIManager
 
     void RemoveCardFromHand(int cardID);
 
-    void ShowCardPlayed(int cardID);
-
     void PutCardInDeck(int cardID);
 
     void RemoveCardFromDeck(int cardID);
@@ -57,6 +55,8 @@ public interface IUIManager
     void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth);
 
     void UpdateEnemyStunStatus(int monsterID, bool stunned);
+
+    void ShowChefAttacking(int monsterID);
 
     /*
      * This method must somehow cause the backend to call RunNextEnemyTurn().

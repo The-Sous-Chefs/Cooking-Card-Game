@@ -267,21 +267,6 @@ public class BoardManager : MonoBehaviour, IUIManager
         GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
     }
 
-    public void ShowCardPlayed(int cardID)
-    {
-        // NOTE: Could use cardID to figure out what type of card it is and play
-        //       a different animation
-
-        if(CardDatabase.Instance.GetCardByID(cardID).cardClasses.Contains(CardClass.DAMAGE))
-        {
-            Animator chefAnimator = ChefGroup.GetComponent<Animator>();
-            if(chefAnimator != null)
-            {
-                chefAnimator.Play(Constants.CHEF_ATTACK_ANIMATION);
-            }
-        }
-    }
-
     public void PutCardInDeck(int cardID)
     {
         numCardsInDeck++;
@@ -415,6 +400,18 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         Debug.Assert(enemies.ContainsKey(monsterID));
         enemies[monsterID].ToggleStunned(stunned);
+    }
+
+    public void ShowChefAttacking(int monsterID)
+    {
+        // NOTE: Could play a different animation if monsterID is
+        //       Constants.NO_TARGET
+
+        Animator chefAnimator = ChefGroup.GetComponent<Animator>();
+        if(chefAnimator != null)
+        {
+            chefAnimator.Play(Constants.CHEF_ATTACK_ANIMATION);
+        }
     }
 
     /*

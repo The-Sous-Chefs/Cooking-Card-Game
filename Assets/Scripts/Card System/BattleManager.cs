@@ -252,8 +252,6 @@ public class BattleManager : MonoBehaviour
                     PlayerStats.Instance.GetGlobalMana()
             );
 
-            boardManager.ShowCardPlayed(cardID);
-
             Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
 
             switch(cardToPlay.cardType)
@@ -341,7 +339,9 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Dealing " + card.singleDamage + " damage to " + monsters[targetMonster].name + ".");
 
+            boardManager.ShowChefAttacking(targetMonster);
             monsters[targetMonster].DecreaseHP(card.singleDamage);
+
             if(monsters[targetMonster].currentHP <= 0)
             {
                 monsters.Remove(targetMonster);
@@ -371,6 +371,7 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Dealing " + card.aoeDamage + " damage to all enemies.");
 
+            boardManager.ShowChefAttacking(Constants.NO_TARGET);
             // removing monsterIDs from monsters while iterating over its keys
             // could cause problems, so they'll be added to this list to be
             // removed after the foreach loop
@@ -653,6 +654,7 @@ public class BattleManager : MonoBehaviour
         {
             // actualDamage is the negative of the excess block percentage times
             // the original damage, so apply that damage to the enemy
+            boardManager.ShowChefAttacking(monsterID);
             monsters[monsterID].DecreaseHP(actualDamage * -1);
             boardManager.UpdateEnemyHealth(
                     monsterID,
