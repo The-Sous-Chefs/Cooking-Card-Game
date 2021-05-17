@@ -29,6 +29,9 @@ public static class Constants
     public static int MAX_HAND_SIZE = 10;
     public static int DCCS_SIZE = 5;
 
+    // rule-related constants
+    public static int NUM_BASIC_ABILITIES = 3;
+
     // enemy-related constants
     public static int MAX_ENEMIES = 3;
 

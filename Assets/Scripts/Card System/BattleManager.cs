@@ -377,13 +377,16 @@ public class BattleManager : MonoBehaviour
                 Debug.Log("animating");
                 animator.SetTrigger("chefAtt");
             }
-            foreach (int monsterID in monsters.Keys)
+            // removing monsterIDs from monsters while iterating over its keys
+            // could cause problems, so they'll be added to this list to be
+            // removed after the foreach loop
+            List<int> monsterIDsToRemove = new List<int>();
+            foreach(int monsterID in monsters.Keys)
             {
                 monsters[monsterID].DecreaseHP(card.aoeDamage);
                 if(monsters[monsterID].currentHP <= 0)
                 {
-                    monsters.Remove(monsterID);
-                    boardManager.RemoveEnemy(monsterID);
+                    monsterIDsToRemove.Add(monsterID);
                 }
                 else
                 {
@@ -393,6 +396,11 @@ public class BattleManager : MonoBehaviour
                             monsters[monsterID].currentHP
                     );
                 }
+            }
+            foreach(int monsterID in monsterIDsToRemove)
+            {
+                monsters.Remove(monsterID);
+                boardManager.RemoveEnemy(monsterID);
             }
             if(CheckIfAllEnemiesDefeated())
             {
@@ -581,6 +589,10 @@ public class BattleManager : MonoBehaviour
     // NOTE: This method used to be public and called directly by a button
     private void DoEnemyTurn()
     {
+        // it is possible that reflected damage could defeat monsters and
+        // removing them from monsters while iterating across its keys could
+        // cause issues, so this List will remove them after the loop
+        List<int> monsterIDsToRemove = new List<int>();
         foreach(int monsterID in monsters.Keys)
         {
             Monster currentMonster = monsters[monsterID];
@@ -592,7 +604,11 @@ public class BattleManager : MonoBehaviour
                 case MonsterAction.REST:
                     break;
                 case MonsterAction.ATTACK:
-                    HandleEnemyAttack(monsterID);
+                    bool enemyDefeated = HandleEnemyAttack(monsterID);
+                    if(enemyDefeated)
+                    {
+                        monsterIDsToRemove.Add(monsterID);
+                    }
                     break;
                 case MonsterAction.SKILL:
                     HandleEnemySpecialSkill(monsterID);
@@ -607,9 +623,18 @@ public class BattleManager : MonoBehaviour
             currentMonster.ClearEffects();
             boardManager.UpdateEnemyStunStatus(monsterID, false);
         }
+        foreach(int monsterID in monsterIDsToRemove)
+        {
+            monsters.Remove(monsterID);
+            boardManager.RemoveEnemy(monsterID);
+        }
+        if(CheckIfAllEnemiesDefeated())
+        {
+            boardManager.WinGame();
+        }
     }
 
-    private void HandleEnemyAttack(int monsterID)
+    private bool HandleEnemyAttack(int monsterID)
     {
         int actualDamage = (int) (((float) monsters[monsterID].attackDamage) * (1.0f - blockPercent));
         if(actualDamage >= 0f)
@@ -624,28 +649,25 @@ public class BattleManager : MonoBehaviour
             {
                 boardManager.LoseGame();
             }
+            return false;
         }
         else
         {
             // actualDamage is the negative of the excess block percentage times
             // the original damage, so apply that damage to the enemy
             monsters[monsterID].DecreaseHP(actualDamage * -1);
+            boardManager.UpdateEnemyHealth(
+                    monsterID,
+                    monsters[monsterID].maxHP,
+                    monsters[monsterID].currentHP
+            );
             if(monsters[monsterID].currentHP <= 0)
             {
-                monsters.Remove(monsterID);
-                boardManager.RemoveEnemy(monsterID);
+                return true;
             }
             else
             {
-                boardManager.UpdateEnemyHealth(
-                        monsterID,
-                        monsters[monsterID].maxHP,
-                        monsters[monsterID].currentHP
-                );
-            }
-            if(CheckIfAllEnemiesDefeated())
-            {
-                boardManager.WinGame();
+                return false;
             }
         }
     }

@@ -40,9 +40,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private Text deckCountText;
     [SerializeField] private Text discardPileCountText;
 
-    [SerializeField] private Button basicAttackButton;
-    [SerializeField] private Button basicBlockButton;
-    [SerializeField] private Button basicManaRefreshButton;
+    [SerializeField] private BasicAbilityButton[] abilityButtons;
 
     [SerializeField] private Image stunIndicatorImage;
 
@@ -85,11 +83,21 @@ public class BoardManager : MonoBehaviour, IUIManager
         deckCountText.text = numCardsInDeck.ToString();
         discardPileCountText.text = numCardsInDiscardPile.ToString();
         stunIndicatorImage.enabled = false;
+
+        List<int> basicAbilityIDs = CardDatabase.Instance.GetBasicAbilityIDs();
+        Debug.Assert(
+                abilityButtons.Length <= basicAbilityIDs.Count,
+                "There should be a basic ability for each basic ability button!"
+        );
+        for(int i = 0; i < abilityButtons.Length; i++)
+        {
+            abilityButtons[i].SetContent(basicAbilityIDs[i], this);
+        }
     }
 
     // NOTE: This method should only be passed the ID of the basic abilities,
     //       because if it gets any other CardID, it will just result in that
-    //       resolve that card having its effects resolved.
+    //       card having its effects resolved.
     public void UseBasicAbility(int abilityID)
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
@@ -293,16 +301,26 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void ActivateBasicAbilities()
     {
-        basicAttackButton.interactable = true;
-        basicBlockButton.interactable = true;
-        basicManaRefreshButton.interactable = true;
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = true;
+            }
+        }
     }
 
     public void DeactivateBasicAbilities()
     {
-        basicAttackButton.interactable = false;
-        basicBlockButton.interactable = false;
-        basicManaRefreshButton.interactable = false;
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = false;
+            }
+        }
     }
 
     public void AddEnemy(int monsterID, Monster monster)
