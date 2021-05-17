@@ -9,6 +9,7 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler,IDragH
 {
     public Canvas canvas;
     private bool canDrag;
+    private bool shouldZoomIn;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
     private int index;
@@ -17,6 +18,7 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler,IDragH
     private void Awake()
     {
         canDrag = true;
+        shouldZoomIn = false;
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
     }
@@ -26,16 +28,27 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler,IDragH
         this.canDrag = canDrag;
     }
 
+    public void SetShouldZoomIn(bool shouldZoomIn)
+    {
+        this.shouldZoomIn = shouldZoomIn;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         //   if (wedonthavecardselected)
         //   Now it will still trigger while we are dragging another card
         if (GameObject.Find("SelectedCard").transform.childCount == 0)
         {
-            rectTransform.localScale = (canDrag) ? new Vector3(1.2f, 1.2f, 1.2f) : new Vector3(1f, 1f, 1f);
-            GameObject.Find("placeHolder").transform.SetSiblingIndex(rectTransform.GetSiblingIndex()+1);
-
-
+            rectTransform.localScale = (canDrag) ?
+                    new Vector3(1.2f, 1.2f, 1.2f) :
+                    (shouldZoomIn) ?
+                            new Vector3(2.2f, 2.2f, 2.2f) :
+                            new Vector3(1f, 1f, 1f)
+            ;
+            if(canDrag)
+            {
+                GameObject.Find("placeHolder").transform.SetSiblingIndex(rectTransform.GetSiblingIndex()+1);
+            }
         }
     }
 

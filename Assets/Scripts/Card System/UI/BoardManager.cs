@@ -306,6 +306,7 @@ public class BoardManager : MonoBehaviour, IUIManager
                 dccsCardTransform.anchoredPosition = Vector2.zero;
                 dccsCard.GetComponent<CardUI>().CreateCard(cardID);
                 dccsCard.GetComponent<DragDrop>().SetCanDrag(false);
+                dccsCard.GetComponent<DragDrop>().SetShouldZoomIn(true);
             }
             Transform countTransform = dccsSlotTransform.Find(Constants.DCCS_COUNT_NAME);
             if(countTransform != null)
