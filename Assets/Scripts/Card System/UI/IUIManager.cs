@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void CardPlayedDelegate(int cardID, int targetEnemyID);
-public delegate void BasicAbilityUsedDelegate(int abilityID, int targetEnemyID);
-public delegate void PlayerTurnEndedDelgate();
-
 /*
  * This interface can be implemented by both the actual UI for the battle system
  * and a testing UI. The BattleManager can just have a reference to an IUIManager
@@ -20,18 +16,6 @@ public delegate void PlayerTurnEndedDelgate();
  */
 public interface IUIManager
 {
-    //-------
-    // events
-    //-------
-
-    event CardPlayedDelegate CardPlayedEvent;
-    event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
-
-    //--------
-    // methods
-    //--------
-
     void UpdatePlayerHealth(int maxHealth, int currentHealth);
 
     void UpdatePlayerMana(int maxMana, int currentMana);

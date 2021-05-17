@@ -66,7 +66,7 @@ public class TestEnemy : MonoBehaviour, IDropHandler
             BoardManager boardManager = boardManageGameObject.GetComponent<BoardManager>();
             if(boardManager != null)
             {
-                boardManager.playCardByID(
+                boardManager.PlayCardByID(
                         tempCard.transform.GetChild(0).GetComponent<CardUI>().cardID,
                         id
                 );

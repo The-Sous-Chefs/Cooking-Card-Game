@@ -3892,6 +3892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18e7f7f90a34f4c74b1f11250cf567e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  battleManager: {fileID: 0}
   card: {fileID: 1349812047605934530, guid: d69f88c9bac37485f93469d530885d29, type: 3}
   enemy: {fileID: 5276261411568105493, guid: 4536b77fed8d947629106e2e33720b78, type: 3}
   dccsSlots:

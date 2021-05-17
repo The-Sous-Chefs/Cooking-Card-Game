@@ -5,19 +5,12 @@ using UnityEngine.UI;
 
 public class TestUIManager : MonoBehaviour, IUIManager
 {
-    //-------
-    // events
-    //-------
-
-    public event CardPlayedDelegate CardPlayedEvent;
-    public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
-
     //-----------------
     // member variables
     //-----------------
 
     // variables the UI needs to keep track of to work
+    [SerializeField] private BattleManager battleManager;
     private List<int> cardsInHand;
     private Dictionary<int, (int cardID, int countDown)> dccs;
     private int currentCardIndex;
@@ -113,9 +106,9 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void PlayCurrentCard()
     {
         Debug.Assert((currentCardIndex >= 0) && (currentCardIndex < cardsInHand.Count));
-        if(CardPlayedEvent != null)
+        if(battleManager != null)
         {
-            CardPlayedEvent(cardsInHand[currentCardIndex], 0);
+            battleManager.PlayCard(cardsInHand[currentCardIndex], 0);
         }
     }
 
@@ -125,20 +118,11 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void UseBasicAbility(int abilityID)
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
-        if(BasicAbilityUsedEvent != null)
+        if(battleManager != null)
         {
-            BasicAbilityUsedEvent(abilityID, Constants.NO_TARGET);
+            battleManager.PlayCard(abilityID, Constants.NO_TARGET);
         }
     }
-
-    /*public void PlayCardById(int id)
-    {
-        Debug.Assert(cardsInHand.Contains(id));
-        if (CardPlayedEvent != null)
-        {
-            CardPlayedEvent(id);
-        }
-    }*/
 
     private void MakeMonsterSwitcherTransparent()
     {
@@ -149,9 +133,9 @@ public class TestUIManager : MonoBehaviour, IUIManager
     {
         monsterSwitcherImage.color = new Color(255, 255, 255, 255);
         Invoke("MakeMonsterSwitcherTransparent", 1);
-        if(PlayerTurnEndedEvent != null)
+        if(battleManager != null)
         {
-            PlayerTurnEndedEvent();
+            battleManager.HandleEndOfPlayerTurn();
         }
     }
 

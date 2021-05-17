@@ -6,19 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class BoardManager : MonoBehaviour, IUIManager
 {
-    //-------
-    // events
-    //-------
-
-    public event CardPlayedDelegate CardPlayedEvent;
-    public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
-
     //-----------------
     // member variables
     //-----------------
 
     // variables the UI needs to keep track of to work
+    [SerializeField] private BattleManager battleManager;
     [SerializeField] private GameObject card;
     [SerializeField] private GameObject enemy;
     [SerializeField] private GameObject[] dccsSlots = new GameObject[Constants.DCCS_SIZE];  // if more than 5 are added in inspector, they'll be ignored
@@ -101,22 +94,15 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void UseBasicAbility(int abilityID)
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
-        if(BasicAbilityUsedEvent != null)
+        if(battleManager != null)
         {
-            BasicAbilityUsedEvent(abilityID, Constants.NO_TARGET);
+            battleManager.PlayCard(abilityID, Constants.NO_TARGET);
         }
-    }
-
-    // don't know why the timer wait is not working here.
-    IEnumerator TimerHang()
-    {
-        Debug.Log("start timer");
-        yield return new WaitForSeconds(5);
     }
 
     public void EndPlayerTurn()
     {
-        if(PlayerTurnEndedEvent != null)
+        if(battleManager != null)
         {
             foreach(int enemyID in enemies.Keys)
             {
@@ -127,15 +113,13 @@ public class BoardManager : MonoBehaviour, IUIManager
                     animator.SetTrigger("attack");
                 }
             }
-            StartCoroutine(TimerHang());
-            Debug.Log("end timer");
-            PlayerTurnEndedEvent();
+
+            battleManager.HandleEndOfPlayerTurn();
 
             // if (animator != null)
             // {
             //    // animator.ResetTrigger("attack");
             // }
-
         }
     }
 
@@ -369,11 +353,11 @@ public class BoardManager : MonoBehaviour, IUIManager
         loseMessage.SetActive(true);
     }
 
-    public void playCardByID(int cardId, int targetEnemyID)
+    public void PlayCardByID(int cardId, int targetEnemyID)
     {
-        if(CardPlayedEvent != null)
+        if(battleManager != null)
         {
-            CardPlayedEvent(cardId, targetEnemyID);
+            battleManager.PlayCard(cardId, targetEnemyID);
         }
     }
 }

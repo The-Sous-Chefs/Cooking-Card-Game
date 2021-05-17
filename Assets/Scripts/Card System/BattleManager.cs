@@ -54,9 +54,6 @@ public class BattleManager : MonoBehaviour
         // Start(), so boardManager will be null at the time; if for some
         // reason, however BattleManager is disabled, then re-enabled, we'll
         // want it in OnEnable() as well
-        boardManager.CardPlayedEvent += PlayCard;
-        boardManager.BasicAbilityUsedEvent += PlayCard;
-        boardManager.PlayerTurnEndedEvent += HandleEndOfPlayerTurn;
 
         // initialize the deck, discardPile, hand, and DCCS
         deck = PlayerStats.Instance.GetCollectedCardIDs();
@@ -132,26 +129,6 @@ public class BattleManager : MonoBehaviour
         //       we can uncomment the line below (if we do, we can get rid of
         //       "blockPercent = 0.0f;" above)
         // StartPlayerTurn();
-    }
-
-    void OnEnable()
-    {
-        if(boardManager != null)
-        {
-            boardManager.CardPlayedEvent += PlayCard;
-            boardManager.BasicAbilityUsedEvent += PlayCard;
-            boardManager.PlayerTurnEndedEvent += HandleEndOfPlayerTurn;
-        }
-    }
-
-    void OnDisable()
-    {
-        if(boardManager != null)
-        {
-            boardManager.CardPlayedEvent -= PlayCard;
-            boardManager.BasicAbilityUsedEvent -= PlayCard;
-            boardManager.PlayerTurnEndedEvent -= HandleEndOfPlayerTurn;
-        }
     }
 
     private void ShuffleDeck()
@@ -260,8 +237,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // NOTE: This method used to be public and called directly by a button
-    private void PlayCard(int cardID, int targetEnemyID)
+    public void PlayCard(int cardID, int targetEnemyID)
     {
         // only if remaining mana is affordable and space exists for Delayed or
         // Continuous cards
@@ -604,7 +580,7 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    private void HandleEndOfPlayerTurn()
+    public void HandleEndOfPlayerTurn()
     {
         EndPlayerTurn();
         DoEnemyTurn();
