@@ -36,6 +36,8 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private BasicAbilityButton[] abilityButtons;
     [SerializeField] private Button endTurnButton;
 
+    [SerializeField] private StunnedMessage stunnedMessage;
+
     [SerializeField] private Image stunIndicatorImage;
 
     [SerializeField] private GameObject winMessage;
@@ -199,7 +201,14 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         if(isPlayerStunned)
         {
-            //
+            if(stunnedMessage != null)
+            {
+                // this method will play the appropriate animation, which has
+                // an animation event that will call a method in the
+                // stunnedMessage to call EndPlayerTurn() on this BoardManager,
+                // so the player's turn will end when the stunned animation ends
+                stunnedMessage.PlayAnimation();
+            }
         }
         else
         {
