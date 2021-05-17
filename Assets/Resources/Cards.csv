@@ -28,7 +28,7 @@ Name26,15,Continuous,2,,,,,,,1,,,,"For 2 turns, block 100% of incoming damage."
 Name27,2,Continuous,5,,1,,,,,,,,,"For 5 turns, deal 1 damage to all enemies."
 Name28,3,Continuous,2,,,,1,,,,,,,"For 2 turns, draw 1 extra card."
 Name29,3,Immediate,,,,,3,3,,,,,,Discard up to 3 cards and draw 3 cards.
-Name30,4,Immediate,,10,,,,10,,,,,,Discard your hand. Deal 10 damage to all enemies.
+Name30,4,Immediate,,,10,,,10,,,,,,Discard your hand. Deal 10 damage to all enemies.
 ,6,Delayed ,2,,,,,,,,,3,X,"After 2 turns, randomly generate x cards regardless rarity "
 ,3,Immediate ,,,,,3,3,,,,,X,Discard up to 3 cards and withdraw up to 3 cards
 ,4,Immediate ,,,,,,,,,,10,X,"Discard all the hands, deal x to all the enemies"
