@@ -34,6 +34,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private Text discardPileCountText;
 
     [SerializeField] private BasicAbilityButton[] abilityButtons;
+    [SerializeField] private Button endTurnButton;
 
     [SerializeField] private Image stunIndicatorImage;
 
@@ -104,6 +105,7 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         if(battleManager != null)
         {
+            DisableInteraction();
             battleManager.HandleEndOfPlayerTurn();
         }
     }
@@ -111,6 +113,50 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void HandleEnemyTurnAnimationEnded()
     {
         battleManager.RunNextEnemyTurn();
+    }
+
+    private void EnableInteraction()
+    {
+        // enable cards in hand
+        foreach(CardUI cardUI in hand)
+        {
+            DragDrop cardDragDrop = cardUI.gameObject.GetComponent<DragDrop>();
+            if(cardDragDrop != null)
+            {
+                cardDragDrop.SetCanDrag(true);
+            }
+        }
+
+        // enable basic abilities
+        EnableBasicAbilities();
+
+        // enable ending the turn
+        if(endTurnButton != null)
+        {
+            endTurnButton.interactable = true;
+        }
+    }
+
+    private void DisableInteraction()
+    {
+        // disable cards in hand
+        foreach(CardUI cardUI in hand)
+        {
+            DragDrop cardDragDrop = cardUI.gameObject.GetComponent<DragDrop>();
+            if(cardDragDrop != null)
+            {
+                cardDragDrop.SetCanDrag(false);
+            }
+        }
+
+        // disable basic abilities
+        DisableBasicAbilities();
+
+        // disable ending the turn
+        if(endTurnButton != null)
+        {
+            endTurnButton.interactable = false;
+        }
     }
 
     public void RestartBattle()
@@ -124,6 +170,44 @@ public class BoardManager : MonoBehaviour, IUIManager
     //-------------------
     // IUIManager methods
     //-------------------
+
+    public void EnableBasicAbilities()
+    {
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = true;
+            }
+        }
+    }
+
+    public void DisableBasicAbilities()
+    {
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = false;
+            }
+        }
+    }
+
+    public void StartPlayerTurn(bool isPlayerStunned)
+    {
+        if(isPlayerStunned)
+        {
+            //
+        }
+        else
+        {
+            // enable all interactions
+            EnableInteraction();
+            UpdatePlayerStunStatus(isPlayerStunned);
+        }
+    }
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
@@ -269,30 +353,6 @@ public class BoardManager : MonoBehaviour, IUIManager
                     Debug.Assert(newCountDown >= 0);
                     countText.text = newCountDown.ToString();
                 }
-            }
-        }
-    }
-
-    public void ActivateBasicAbilities()
-    {
-        foreach(BasicAbilityButton abilityButton in abilityButtons)
-        {
-            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
-            if(buttonComponent != null)
-            {
-                buttonComponent.interactable = true;
-            }
-        }
-    }
-
-    public void DeactivateBasicAbilities()
-    {
-        foreach(BasicAbilityButton abilityButton in abilityButtons)
-        {
-            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
-            if(buttonComponent != null)
-            {
-                buttonComponent.interactable = false;
             }
         }
     }

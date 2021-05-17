@@ -280,7 +280,7 @@ public class BattleManager : MonoBehaviour
                         // effects
                         ResolveCardEffectsNoTarget(cardToPlay);
                         cantUseBasicAbility = true;
-                        boardManager.DeactivateBasicAbilities();
+                        boardManager.DisableBasicAbilities();
                     }
                     break;
 
@@ -498,9 +498,6 @@ public class BattleManager : MonoBehaviour
     }
 
     // NOTE: This method used to be public and called directly by a button
-    // WHEN ADDING TURNING OFF INTERACTIONS DURING THE ENEMY TURN, THIS WILL NEED
-    // TO CHANGE TO RE-ENABLE ALL INTERACTIONS, THEN DISABLE ABILITIES AND RE-ENABLE
-    // THEM IF THE PLAYER CAN USE THEM!
     private void StartPlayerTurn()
     {
         // NOTE: update any player status first, since DCCS may affect it and we
@@ -511,20 +508,14 @@ public class BattleManager : MonoBehaviour
         boardManager.UpdatePlayerBlockPercent(blockPercent);
 
         // reactivate the player's basic abilities for the turn
+        // EndPlayerTurn() will handle decrementing it stunnedTurns
         if(cantUseBasicAbility && (stunnedTurns == 0))
         {
             // basic abilities should remain disabled if the player is stunned
             cantUseBasicAbility = false;
-            boardManager.ActivateBasicAbilities();
         }
 
-        // handle becoming un-stunned (EndPlayerTurn() will handle decrementing it)
-        if(stunnedTurns == 0)
-        {
-            // NOTE: This will happen every turn the player isn't stunned, not
-            //       just the first turn they stop being stunned.
-            boardManager.UpdatePlayerStunStatus(false);
-        }
+        boardManager.StartPlayerTurn(stunnedTurns > 0);
 
         // handle cards in the DCCS
         List<int> cardsToRemove = new List<int>();
@@ -699,7 +690,7 @@ public class BattleManager : MonoBehaviour
         // being stunned prevents the use of basic abilities as well,
         // StartPlayerTurn() will re-enable them when they stop being stunned
         cantUseBasicAbility = true;
-        boardManager.DeactivateBasicAbilities();
+        boardManager.DisableBasicAbilities();
     }
 
     private bool CheckIfAllEnemiesDefeated()

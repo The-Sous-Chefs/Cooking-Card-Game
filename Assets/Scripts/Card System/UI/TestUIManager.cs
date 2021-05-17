@@ -201,6 +201,29 @@ public class TestUIManager : MonoBehaviour, IUIManager
     // IUIManager methods
     //-------------------
 
+    public void EnableBasicAbilities()
+    {
+        basicAttackButton.interactable = true;
+        basicBlockButton.interactable = true;
+        basicManaRefreshButton.interactable = true;
+    }
+
+    public void DisableBasicAbilities()
+    {
+        basicAttackButton.interactable = false;
+        basicBlockButton.interactable = false;
+        basicManaRefreshButton.interactable = false;
+    }
+
+    public void StartPlayerTurn(bool isPlayerStunned)
+    {
+        if(!isPlayerStunned)
+        {
+            EnableBasicAbilities();
+        }
+        UpdatePlayerStunStatus(isPlayerStunned);
+    }
+
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
         chefHPText.text = "HP: " + currentHealth + " / " + maxHealth;
@@ -322,20 +345,6 @@ public class TestUIManager : MonoBehaviour, IUIManager
         dccs[dccsSlot] = (dccs[dccsSlot].cardID, dccs[dccsSlot].countDown - 1);
 
         UpdateDCCSContents();
-    }
-
-    public void ActivateBasicAbilities()
-    {
-        basicAttackButton.interactable = true;
-        basicBlockButton.interactable = true;
-        basicManaRefreshButton.interactable = true;
-    }
-
-    public void DeactivateBasicAbilities()
-    {
-        basicAttackButton.interactable = false;
-        basicBlockButton.interactable = false;
-        basicManaRefreshButton.interactable = false;
     }
 
     // see the big comment by the TestEnemy member variable

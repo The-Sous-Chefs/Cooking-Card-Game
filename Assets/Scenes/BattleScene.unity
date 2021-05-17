@@ -3912,6 +3912,7 @@ MonoBehaviour:
   - {fileID: 1785414585}
   - {fileID: 1899841756}
   - {fileID: 1966931681}
+  endTurnButton: {fileID: 1494734828}
   stunIndicatorImage: {fileID: 557821412}
   winMessage: {fileID: 1120456530}
   loseMessage: {fileID: 713073713}

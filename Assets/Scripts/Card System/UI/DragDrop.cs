@@ -32,7 +32,7 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler,IDragH
         //   Now it will still trigger while we are dragging another card
         if (GameObject.Find("SelectedCard").transform.childCount == 0)
         {
-            rectTransform.localScale = (canDrag) ? new Vector3(1.2f, 1.2f, 1.2f) : new Vector3(2.2f, 2.2f, 2.2f);
+            rectTransform.localScale = (canDrag) ? new Vector3(1.2f, 1.2f, 1.2f) : new Vector3(1f, 1f, 1f);
             GameObject.Find("placeHolder").transform.SetSiblingIndex(rectTransform.GetSiblingIndex()+1);
 
 

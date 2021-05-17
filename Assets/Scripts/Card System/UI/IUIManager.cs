@@ -16,6 +16,12 @@ using UnityEngine;
  */
 public interface IUIManager
 {
+    void EnableBasicAbilities();
+
+    void DisableBasicAbilities();
+
+    void StartPlayerTurn(bool isPlayerStunned);
+
     void UpdatePlayerHealth(int maxHealth, int currentHealth);
 
     void UpdatePlayerMana(int maxMana, int currentMana);
@@ -41,10 +47,6 @@ public interface IUIManager
     void RemoveCardFromDCCS(int dccsSlot);
 
     void UpdateDCCSCount(int dccsSlot, int newCountDown);
-
-    void ActivateBasicAbilities();
-
-    void DeactivateBasicAbilities();
 
     void AddEnemy(int monsterID, Monster monster);
 
