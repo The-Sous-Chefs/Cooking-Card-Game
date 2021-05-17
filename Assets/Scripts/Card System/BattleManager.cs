@@ -581,10 +581,17 @@ public class BattleManager : MonoBehaviour
         {
             int nextMonsterID = monsterTurnOrder.Peek();
             Monster nextMonster = monsters[nextMonsterID];
-            boardManager.PlayEnemyTurnAnimation(
-                    nextMonsterID,
-                    nextMonster.GetTurnAction()
-            );
+            if(nextMonster.GetTurnAction() == MonsterAction.REST)
+            {
+                RunNextEnemyTurn();
+            }
+            else
+            {
+                boardManager.PlayEnemyTurnAnimation(
+                        nextMonsterID,
+                        nextMonster.GetTurnAction()
+                );
+            }
         }
         catch(InvalidOperationException exception)
         {

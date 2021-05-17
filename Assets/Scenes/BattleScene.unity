@@ -2039,7 +2039,7 @@ MonoBehaviour:
   nameText: {fileID: 1714168030}
   hpText: {fileID: 1805901988}
   healthBar: {fileID: 0}
-  enemyImage: {fileID: 886510841}
+  stunnedIndicator: {fileID: 0}
   animator: {fileID: 0}
 --- !u!114 &886510841
 MonoBehaviour:
@@ -5366,12 +5366,12 @@ PrefabInstance:
     - target: {fileID: 2905672603210257170, guid: 4536b77fed8d947629106e2e33720b78,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2905672603210257170, guid: 4536b77fed8d947629106e2e33720b78,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5276261411568105492, guid: 4536b77fed8d947629106e2e33720b78,
         type: 3}

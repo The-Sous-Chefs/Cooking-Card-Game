@@ -11,13 +11,14 @@ public class TestEnemy : MonoBehaviour, IDropHandler
     [SerializeField] private Text nameText;
     [SerializeField] private Text hpText;
     [SerializeField] private HealthBar healthBar;
-    [SerializeField] private Image enemyImage;
+    [SerializeField] private GameObject stunnedIndicator;
     [SerializeField] private Animator animator;
     private int id;
 
     void Awake()
     {
         id = -1;
+        stunnedIndicator.SetActive(false);
     }
 
     public void SetNameText(string name)
@@ -44,14 +45,7 @@ public class TestEnemy : MonoBehaviour, IDropHandler
 
     public void ToggleStunned(bool stunned)
     {
-        if(stunned)
-        {
-            enemyImage.color = Color.red;
-        }
-        else
-        {
-            enemyImage.color = Color.white;
-        }
+        stunnedIndicator.SetActive(stunned);
     }
 
     public void PlayAttackAnimation()
