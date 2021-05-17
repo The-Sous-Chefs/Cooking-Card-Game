@@ -6,19 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class BoardManager : MonoBehaviour, IUIManager
 {
-    //-------
-    // events
-    //-------
-
-    public event CardPlayedDelegate CardPlayedEvent;
-    public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
-
     //-----------------
     // member variables
     //-----------------
 
     // variables the UI needs to keep track of to work
+    [SerializeField] private BattleManager battleManager;
     [SerializeField] private GameObject card;
     [SerializeField] private GameObject enemy;
     [SerializeField] private GameObject[] dccsSlots = new GameObject[Constants.DCCS_SIZE];  // if more than 5 are added in inspector, they'll be ignored
@@ -40,9 +33,13 @@ public class BoardManager : MonoBehaviour, IUIManager
     [SerializeField] private Text deckCountText;
     [SerializeField] private Text discardPileCountText;
 
-    [SerializeField] private Button basicAttackButton;
-    [SerializeField] private Button basicBlockButton;
-    [SerializeField] private Button basicManaRefreshButton;
+    [SerializeField] private BasicAbilityButton[] abilityButtons;
+    [SerializeField] private Button endTurnButton;
+
+    [SerializeField] private StunnedMessage stunnedMessage;
+
+    [SerializeField] private TurnMessage playerTurnMessage;
+    [SerializeField] private TurnMessage enemyTurnMessage;
 
     [SerializeField] private Image stunIndicatorImage;
 
@@ -85,53 +82,104 @@ public class BoardManager : MonoBehaviour, IUIManager
         deckCountText.text = numCardsInDeck.ToString();
         discardPileCountText.text = numCardsInDiscardPile.ToString();
         stunIndicatorImage.enabled = false;
+
+        List<int> basicAbilityIDs = CardDatabase.Instance.GetBasicAbilityIDs();
+        Debug.Assert(
+                abilityButtons.Length <= basicAbilityIDs.Count,
+                "There should be a basic ability for each basic ability button!"
+        );
+        for(int i = 0; i < abilityButtons.Length; i++)
+        {
+            abilityButtons[i].SetContent(basicAbilityIDs[i], this);
+        }
+    }
+
+    public void PlayCardByID(int cardId, int targetEnemyID)
+    {
+        if(battleManager != null)
+        {
+            battleManager.PlayCard(cardId, targetEnemyID);
+        }
     }
 
     // NOTE: This method should only be passed the ID of the basic abilities,
     //       because if it gets any other CardID, it will just result in that
-    //       resolve that card having its effects resolved.
+    //       card having its effects resolved.
     public void UseBasicAbility(int abilityID)
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
-        if(BasicAbilityUsedEvent != null)
+        if(battleManager != null)
         {
-            BasicAbilityUsedEvent(abilityID, Constants.TEMPORARY_SINGLE_ENEMY_ID);
+            battleManager.PlayCard(abilityID, Constants.NO_TARGET);
         }
-    }
-
-    // don't know why the timer wait is not working here.
-    IEnumerator TimerHang()
-    {
-        Debug.Log("start timer");
-        yield return new WaitForSeconds(5);
     }
 
     public void EndPlayerTurn()
     {
-        if(PlayerTurnEndedEvent != null)
+        DisableInteraction();
+        // the end of this animation will fire an event to start the enemies'
+        // turn
+        enemyTurnMessage.PlayAnimation();
+    }
+
+    public void HandleEndOfPlayerTurn()
+    {
+        if(battleManager != null)
         {
-            foreach(int enemyID in enemies.Keys)
-            {
-                Animator animator = enemies[enemyID].gameObject.GetComponent<Animator>();
-                if (animator != null)
-                {
-                    Debug.Log("animating");
-                    animator.SetTrigger("attack");
-                }
-            }
-            StartCoroutine(TimerHang());
-            Debug.Log("end timer");
-            PlayerTurnEndedEvent();
-
-            // if (animator != null)
-            // {
-            //    // animator.ResetTrigger("attack");
-            // }
-
+            battleManager.HandleEndOfPlayerTurn();
         }
     }
 
-    public void RestartBattle()
+    public void HandleEnemyTurnAnimationEnded()
+    {
+        battleManager.RunNextEnemyTurn();
+    }
+
+    public void EnableInteraction()
+    {
+        // enable cards in hand
+        foreach(CardUI cardUI in hand)
+        {
+            DragDrop cardDragDrop = cardUI.gameObject.GetComponent<DragDrop>();
+            if(cardDragDrop != null)
+            {
+                cardDragDrop.SetCanDrag(true);
+            }
+        }
+
+        // enable basic abilities
+        EnableBasicAbilities();
+
+        // enable ending the turn
+        if(endTurnButton != null)
+        {
+            endTurnButton.interactable = true;
+        }
+    }
+
+    public void DisableInteraction()
+    {
+        // disable cards in hand
+        foreach(CardUI cardUI in hand)
+        {
+            DragDrop cardDragDrop = cardUI.gameObject.GetComponent<DragDrop>();
+            if(cardDragDrop != null)
+            {
+                cardDragDrop.SetCanDrag(false);
+            }
+        }
+
+        // disable basic abilities
+        DisableBasicAbilities();
+
+        // disable ending the turn
+        if(endTurnButton != null)
+        {
+            endTurnButton.interactable = false;
+        }
+    }
+
+    public void EndBattle()
     {
         SceneManager.SetActiveScene(SceneManager.GetSceneByName("TScene"));
         SceneManager.UnloadSceneAsync("BattleScene");
@@ -139,9 +187,70 @@ public class BoardManager : MonoBehaviour, IUIManager
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void RestartGame()
+    {
+        int health = PlayerStats.Instance.GetHealth();
+        int maxHealth = PlayerStats.Instance.GetMaxHealth();
+        int globalMana = PlayerStats.Instance.GetGlobalMana();
+        int maxGlobalMana = PlayerStats.Instance.GetMaxGlobalMana();
+        PlayerStats.Instance.ApplyHealing(maxHealth - health);
+        PlayerStats.Instance.AddGlobalMana(maxGlobalMana - globalMana);
+        SceneManager.UnloadScene("TScene");
+        SceneManager.LoadScene("TScene");
+    }
+
     //-------------------
     // IUIManager methods
     //-------------------
+
+    public void EnableBasicAbilities()
+    {
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = true;
+            }
+        }
+    }
+
+    public void DisableBasicAbilities()
+    {
+        foreach(BasicAbilityButton abilityButton in abilityButtons)
+        {
+            Button buttonComponent = abilityButton.gameObject.GetComponent<Button>();
+            if(buttonComponent != null)
+            {
+                buttonComponent.interactable = false;
+            }
+        }
+    }
+
+    public void StartPlayerTurn(bool isPlayerStunned)
+    {
+        if(isPlayerStunned)
+        {
+            if(stunnedMessage != null)
+            {
+                // this method will play the appropriate animation, which has
+                // an animation event that will call a method in the
+                // stunnedMessage to call EndPlayerTurn() on this BoardManager,
+                // so the player's turn will end when the stunned animation ends
+                stunnedMessage.PlayAnimation();
+            }
+        }
+        else
+        {
+            UpdatePlayerStunStatus(isPlayerStunned);
+            // the end of this animation will fire an event to enable all
+            // interactions
+            if(playerTurnMessage != null)
+            {
+                playerTurnMessage.PlayAnimation();
+            }
+        }
+    }
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
@@ -173,6 +282,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         newCardInUI.GetComponent<DragDrop>().canvas = canvas;
         newCardInUI.GetComponent<CardUI>().CreateCard(cardId);
         hand.Add(newCardInUI.GetComponent<CardUI>());
+        GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
         //newCardInUI.GetComponent<FadeAnimation>().startFading();
     }
 
@@ -188,6 +298,7 @@ public class BoardManager : MonoBehaviour, IUIManager
                 break;
             }
         }
+        GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
     }
 
     public void PutCardInDeck(int cardID)
@@ -229,6 +340,7 @@ public class BoardManager : MonoBehaviour, IUIManager
                 dccsCardTransform.anchoredPosition = Vector2.zero;
                 dccsCard.GetComponent<CardUI>().CreateCard(cardID);
                 dccsCard.GetComponent<DragDrop>().SetCanDrag(false);
+                dccsCard.GetComponent<DragDrop>().SetShouldZoomIn(true);
             }
             Transform countTransform = dccsSlotTransform.Find(Constants.DCCS_COUNT_NAME);
             if(countTransform != null)
@@ -289,25 +401,11 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void ActivateBasicAbilities()
-    {
-        basicAttackButton.interactable = true;
-        basicBlockButton.interactable = true;
-        basicManaRefreshButton.interactable = true;
-    }
-
-    public void DeactivateBasicAbilities()
-    {
-        basicAttackButton.interactable = false;
-        basicBlockButton.interactable = false;
-        basicManaRefreshButton.interactable = false;
-    }
-
     public void AddEnemy(int monsterID, Monster monster)
     {
         Debug.Assert(enemies.Count < Constants.MAX_ENEMIES);
         GameObject newEnemy = Instantiate(enemy, enemyContainer);
-        newEnemy.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        newEnemy.transform.localScale = new Vector3(0.45f, 0.45f, 0.45f);
         TestEnemy enemyUI = newEnemy.GetComponent<TestEnemy>();
         if(enemyUI != null)
         {
@@ -339,6 +437,37 @@ public class BoardManager : MonoBehaviour, IUIManager
         enemies[monsterID].ToggleStunned(stunned);
     }
 
+    public void ShowChefAttacking(int monsterID)
+    {
+        // NOTE: Could play a different animation if monsterID is
+        //       Constants.NO_TARGET
+
+        Animator chefAnimator = ChefGroup.GetComponent<Animator>();
+        if(chefAnimator != null)
+        {
+            chefAnimator.Play(Constants.CHEF_ATTACK_ANIMATION);
+        }
+    }
+
+    /*
+     * This method must somehow cause the backend to call RunNextEnemyTurn().
+     * The backend will call this method to play the animation for the enemy's
+     * turn (if there is one), then when the animation is over, it's relying on
+     * something calling RunNextEnemyTurn() to actually update the state of the
+     * game based on that enemy's action and start the next enemy turn if there
+     * is one or start the player's next turn.
+     *
+     * This implementation causes the enemy to play its attack animation, which
+     * has an animation event to call NotifyBoardManagerAnimationEndeD(), which
+     * will call this class's HandleEnemyTurnAnimationEnded() method, which will
+     * in turn call RunNextEnemyTurn on the battleManager.
+     */
+    public void PlayEnemyTurnAnimation(int monsterID, MonsterAction action)
+    {
+        Debug.Assert(enemies.ContainsKey(monsterID));
+        enemies[monsterID].PlayAttackAnimation();
+    }
+
     public void WinGame()
     {
         winMessage.SetActive(true);
@@ -347,13 +476,5 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void LoseGame()
     {
         loseMessage.SetActive(true);
-    }
-
-    public void playCardByID(int cardId, int targetEnemyID)
-    {
-        if(CardPlayedEvent != null)
-        {
-            CardPlayedEvent(cardId, targetEnemyID);
-        }
     }
 }

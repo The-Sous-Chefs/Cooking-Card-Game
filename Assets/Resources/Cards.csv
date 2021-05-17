@@ -1,7 +1,7 @@
 Name,Cost,Type,Turns In Play,Damage,AOE Damage,Heal,Draw,Discard,Mana Regen,Block,Stun (X = Yes),Basic Value,Ignore (X = Yes),Card Description
-Attack,3,Basic,,3,,,,,,,,,,Deal 3 damage to an enemy.
+Attack,3,Basic,,,2,,,,,,,,,Deal 2 damage to all enemies.
 Block,3,Basic,,,,,,,,0.5,,,,Block 50% of incoming damage this turn. (Blocking over 100% will reflect the excess percent of damage)
-Recover Mana,0,Basic,,,,,,1,4,,,,,"Discard one card, regenerate 4 global mana."
+Recover Mana,0,Basic,,,,,,1,4,,,,,"Discard one card at random, regenerate 4 global mana."
 Slice,1,Immediate ,,5,,,,,,,,,,Deal 5 damage to an enemy.
 Frying Pan Shield,1,Immediate ,,,,,,,,0.4,,,,Block 40% of the incoming damage this turn.
 Name7,2,Immediate ,,8,,,,,,,,,,Deal 8 damage to an enemy.
@@ -9,7 +9,7 @@ Name8,2,Immediate ,,3,,3,,,,,,,,Deal 3 damage to an enemy and recover 3 HP.
 Name9,3,Immediate ,,,,10,,,,,,,,Recover 10 HP.
 Name10,3,Immediate ,,,5,,,,,,,,,Deal 5 damage to all enemies.
 Second Wind,5,Continuous,3,,,3,1,,,,,,,"For 3 turns, recover 3 HP and with draw 1 extra card."
-Ultimate Technique,10,Continuous,4,,4,4,,,,,,,,"For 4 turns, deal 4 damage to all enemies and recover 4 HP."
+Ultimate Jinx,10,Continuous,4,,4,4,,,,,,,,"For 4 turns, deal 4 damage to all enemies and recover 4 HP."
 Name13,5,Continuous,2,,,,,,,,X,,,"For 2 turns, stun an enemy, preventing it from moving."
 Stone Resolve,10,Continuous,3,,,5,,,,0.4,,,,"For 3 turns, block 40% of incoming damage and recover 5 HP."
 Name15,3,Delayed,2,12,,,,,,,,,,"After 2 turns, deal 12 damage to an enemy."
@@ -28,7 +28,7 @@ Name26,15,Continuous,2,,,,,,,1,,,,"For 2 turns, block 100% of incoming damage."
 Name27,2,Continuous,5,,1,,,,,,,,,"For 5 turns, deal 1 damage to all enemies."
 Name28,3,Continuous,2,,,,1,,,,,,,"For 2 turns, draw 1 extra card."
 Name29,3,Immediate,,,,,3,3,,,,,,Discard up to 3 cards and draw 3 cards.
-Name30,4,Immediate,,10,,,,10,,,,,,Discard your hand. Deal 10 damage to all enemies.
+Name30,4,Immediate,,,10,,,10,,,,,,Discard your hand. Deal 10 damage to all enemies.
 ,6,Delayed ,2,,,,,,,,,3,X,"After 2 turns, randomly generate x cards regardless rarity "
 ,3,Immediate ,,,,,3,3,,,,,X,Discard up to 3 cards and withdraw up to 3 cards
 ,4,Immediate ,,,,,,,,,,10,X,"Discard all the hands, deal x to all the enemies"

@@ -5,19 +5,12 @@ using UnityEngine.UI;
 
 public class TestUIManager : MonoBehaviour, IUIManager
 {
-    //-------
-    // events
-    //-------
-
-    public event CardPlayedDelegate CardPlayedEvent;
-    public event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    public event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
-
     //-----------------
     // member variables
     //-----------------
 
     // variables the UI needs to keep track of to work
+    [SerializeField] private BattleManager battleManager;
     private List<int> cardsInHand;
     private Dictionary<int, (int cardID, int countDown)> dccs;
     private int currentCardIndex;
@@ -113,9 +106,9 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void PlayCurrentCard()
     {
         Debug.Assert((currentCardIndex >= 0) && (currentCardIndex < cardsInHand.Count));
-        if(CardPlayedEvent != null)
+        if(battleManager != null)
         {
-            CardPlayedEvent(cardsInHand[currentCardIndex], Constants.TEMPORARY_SINGLE_ENEMY_ID);
+            battleManager.PlayCard(cardsInHand[currentCardIndex], 0);
         }
     }
 
@@ -125,20 +118,11 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void UseBasicAbility(int abilityID)
     {
         Debug.Assert(CardDatabase.Instance.GetBasicAbilityIDs().Contains(abilityID));
-        if(BasicAbilityUsedEvent != null)
+        if(battleManager != null)
         {
-            BasicAbilityUsedEvent(abilityID, Constants.TEMPORARY_SINGLE_ENEMY_ID);
+            battleManager.PlayCard(abilityID, Constants.NO_TARGET);
         }
     }
-
-    /*public void PlayCardById(int id)
-    {
-        Debug.Assert(cardsInHand.Contains(id));
-        if (CardPlayedEvent != null)
-        {
-            CardPlayedEvent(id);
-        }
-    }*/
 
     private void MakeMonsterSwitcherTransparent()
     {
@@ -149,9 +133,9 @@ public class TestUIManager : MonoBehaviour, IUIManager
     {
         monsterSwitcherImage.color = new Color(255, 255, 255, 255);
         Invoke("MakeMonsterSwitcherTransparent", 1);
-        if(PlayerTurnEndedEvent != null)
+        if(battleManager != null)
         {
-            PlayerTurnEndedEvent();
+            battleManager.HandleEndOfPlayerTurn();
         }
     }
 
@@ -216,6 +200,29 @@ public class TestUIManager : MonoBehaviour, IUIManager
     //-------------------
     // IUIManager methods
     //-------------------
+
+    public void EnableBasicAbilities()
+    {
+        basicAttackButton.interactable = true;
+        basicBlockButton.interactable = true;
+        basicManaRefreshButton.interactable = true;
+    }
+
+    public void DisableBasicAbilities()
+    {
+        basicAttackButton.interactable = false;
+        basicBlockButton.interactable = false;
+        basicManaRefreshButton.interactable = false;
+    }
+
+    public void StartPlayerTurn(bool isPlayerStunned)
+    {
+        if(!isPlayerStunned)
+        {
+            EnableBasicAbilities();
+        }
+        UpdatePlayerStunStatus(isPlayerStunned);
+    }
 
     public void UpdatePlayerHealth(int maxHealth, int currentHealth)
     {
@@ -340,20 +347,6 @@ public class TestUIManager : MonoBehaviour, IUIManager
         UpdateDCCSContents();
     }
 
-    public void ActivateBasicAbilities()
-    {
-        basicAttackButton.interactable = true;
-        basicBlockButton.interactable = true;
-        basicManaRefreshButton.interactable = true;
-    }
-
-    public void DeactivateBasicAbilities()
-    {
-        basicAttackButton.interactable = false;
-        basicBlockButton.interactable = false;
-        basicManaRefreshButton.interactable = false;
-    }
-
     // see the big comment by the TestEnemy member variable
     public void AddEnemy(int monsterID, Monster monster)
     {
@@ -378,6 +371,26 @@ public class TestUIManager : MonoBehaviour, IUIManager
     public void UpdateEnemyStunStatus(int monsterID, bool stunned)
     {
         enemy.ToggleStunned(stunned);
+    }
+
+    public void ShowChefAttacking(int monsterID)
+    {
+        //
+    }
+
+    /*
+     * This method must somehow cause the backend to call RunNextEnemyTurn().
+     * The backend will call this method to play the animation for the enemy's
+     * turn (if there is one), then when the animation is over, it's relying on
+     * something calling RunNextEnemyTurn() to actually update the state of the
+     * game based on that enemy's action and start the next enemy turn if there
+     * is one or start the player's next turn.
+     *
+     * This UI doesn't have animations, so it simply calls RunNextEnemyTurn().
+     */
+    public void PlayEnemyTurnAnimation(int monsterID, MonsterAction action)
+    {
+        battleManager.RunNextEnemyTurn();
     }
 
     public void WinGame()

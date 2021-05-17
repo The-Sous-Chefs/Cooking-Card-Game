@@ -7,16 +7,18 @@ using UnityEngine.UI;
 
 public class TestEnemy : MonoBehaviour, IDropHandler
 {
+    [SerializeField] private GameObject boardManageGameObject;
     [SerializeField] private Text nameText;
     [SerializeField] private Text hpText;
     [SerializeField] private HealthBar healthBar;
-    [SerializeField] private Image enemyImage;
-    [SerializeField] private GameObject boardManageGameObject;
+    [SerializeField] private GameObject stunnedIndicator;
+    [SerializeField] private Animator animator;
     private int id;
 
     void Awake()
     {
         id = -1;
+        stunnedIndicator.SetActive(false);
     }
 
     public void SetNameText(string name)
@@ -43,13 +45,26 @@ public class TestEnemy : MonoBehaviour, IDropHandler
 
     public void ToggleStunned(bool stunned)
     {
-        if(stunned)
+        stunnedIndicator.SetActive(stunned);
+    }
+
+    public void PlayAttackAnimation()
+    {
+        if(animator != null)
         {
-            enemyImage.color = Color.red;
+            animator.Play(Constants.ATTACK_ANIMATION);
         }
-        else
+    }
+
+    public void NotifyBoardManagerAnimationEnded()
+    {
+        if(boardManageGameObject != null)
         {
-            enemyImage.color = Color.white;
+            BoardManager boardManager = boardManageGameObject.GetComponent<BoardManager>();
+            if(boardManager != null)
+            {
+                boardManager.HandleEnemyTurnAnimationEnded();
+            }
         }
     }
 
@@ -66,7 +81,7 @@ public class TestEnemy : MonoBehaviour, IDropHandler
             BoardManager boardManager = boardManageGameObject.GetComponent<BoardManager>();
             if(boardManager != null)
             {
-                boardManager.playCardByID(
+                boardManager.PlayCardByID(
                         tempCard.transform.GetChild(0).GetComponent<CardUI>().cardID,
                         id
                 );

@@ -29,13 +29,18 @@ public static class Constants
     public static int MAX_HAND_SIZE = 10;
     public static int DCCS_SIZE = 5;
 
+    // rule-related constants
+    public static int NUM_BASIC_ABILITIES = 3;
+
     // enemy-related constants
     public static int MAX_ENEMIES = 3;
 
     // UI-related constants
     public static string DCCS_CARD_HOLDER_NAME = "CardHolder";
     public static string DCCS_COUNT_NAME = "Count";
-
-    // temporary constants
-    public static int TEMPORARY_SINGLE_ENEMY_ID = 0;
+    public static string ATTACK_ANIMATION = "attack animation";
+    public static string CHEF_ATTACK_ANIMATION = "Chef Attack Animation";
+    public static string STUN_MESSAGE_ANIMATION = "Stun Message";
+    public static string TURN_MESSAGE_ANIMATION = "Play Message";
+    public static int NO_TARGET = -1;
 }

@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void CardPlayedDelegate(int cardID, int targetEnemyID);
-public delegate void BasicAbilityUsedDelegate(int abilityID, int targetEnemyID);
-public delegate void PlayerTurnEndedDelgate();
-
 /*
  * This interface can be implemented by both the actual UI for the battle system
  * and a testing UI. The BattleManager can just have a reference to an IUIManager
@@ -20,17 +16,11 @@ public delegate void PlayerTurnEndedDelgate();
  */
 public interface IUIManager
 {
-    //-------
-    // events
-    //-------
+    void EnableBasicAbilities();
 
-    event CardPlayedDelegate CardPlayedEvent;
-    event BasicAbilityUsedDelegate BasicAbilityUsedEvent;
-    event PlayerTurnEndedDelgate PlayerTurnEndedEvent;
+    void DisableBasicAbilities();
 
-    //--------
-    // methods
-    //--------
+    void StartPlayerTurn(bool isPlayerStunned);
 
     void UpdatePlayerHealth(int maxHealth, int currentHealth);
 
@@ -58,10 +48,6 @@ public interface IUIManager
 
     void UpdateDCCSCount(int dccsSlot, int newCountDown);
 
-    void ActivateBasicAbilities();
-
-    void DeactivateBasicAbilities();
-
     void AddEnemy(int monsterID, Monster monster);
 
     void RemoveEnemy(int monsterID);
@@ -69,6 +55,18 @@ public interface IUIManager
     void UpdateEnemyHealth(int monsterID, int maxHealth, int currentHealth);
 
     void UpdateEnemyStunStatus(int monsterID, bool stunned);
+
+    void ShowChefAttacking(int monsterID);
+
+    /*
+     * This method must somehow cause the backend to call RunNextEnemyTurn().
+     * The backend will call this method to play the animation for the enemy's
+     * turn (if there is one), then when the animation is over, it's relying on
+     * something calling RunNextEnemyTurn() to actually update the state of the
+     * game based on that enemy's action and start the next enemy turn if there
+     * is one or start the player's next turn.
+     */
+    void PlayEnemyTurnAnimation(int monsterID, MonsterAction action);
 
     void WinGame();
 

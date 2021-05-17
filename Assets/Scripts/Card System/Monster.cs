@@ -53,8 +53,12 @@ public class Monster
         {
             actionTaken = actionPattern[actionPatternIndex];
         }
-        actionPatternIndex = (actionPatternIndex + 1) % actionPattern.Length;
         return actionTaken;
+    }
+
+    public void GoToNextTurnAction()
+    {
+        actionPatternIndex = (actionPatternIndex + 1) % actionPattern.Length;
     }
 
     public void BecomeStunned()
