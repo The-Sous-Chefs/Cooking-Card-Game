@@ -296,6 +296,11 @@ public class TestUIManager : MonoBehaviour, IUIManager
         }
     }
 
+    public void ShowCardPlayed(int cardID)
+    {
+        //
+    }
+
     // add a card to the players deck and update the visuals accordingly
     public void PutCardInDeck(int cardID)
     {

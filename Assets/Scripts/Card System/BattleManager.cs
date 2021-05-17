@@ -252,6 +252,8 @@ public class BattleManager : MonoBehaviour
                     PlayerStats.Instance.GetGlobalMana()
             );
 
+            boardManager.ShowCardPlayed(cardID);
+
             Card cardToPlay = CardDatabase.Instance.GetCardByID(cardID);
 
             switch(cardToPlay.cardType)
@@ -338,12 +340,6 @@ public class BattleManager : MonoBehaviour
         if((card.singleDamage > 0) && monsters.ContainsKey(targetMonster))
         {
             Debug.Log("Dealing " + card.singleDamage + " damage to " + monsters[targetMonster].name + ".");
-            Animator animator = boardManagerObject.GetComponent<BoardManager>().ChefGroup.GetComponent<Animator>();
-            if (animator != null)
-            {
-                Debug.Log("animating");
-                animator.SetTrigger("chefAtt");
-            }
 
             monsters[targetMonster].DecreaseHP(card.singleDamage);
             if(monsters[targetMonster].currentHP <= 0)
@@ -374,12 +370,7 @@ public class BattleManager : MonoBehaviour
         if(card.aoeDamage > 0)
         {
             Debug.Log("Dealing " + card.aoeDamage + " damage to all enemies.");
-            Animator animator = boardManagerObject.GetComponent<BoardManager>().ChefGroup.GetComponent<Animator>();
-            if (animator != null)
-            {
-                Debug.Log("animating");
-                animator.SetTrigger("chefAtt");
-            }
+
             // removing monsterIDs from monsters while iterating over its keys
             // could cause problems, so they'll be added to this list to be
             // removed after the foreach loop

@@ -267,6 +267,21 @@ public class BoardManager : MonoBehaviour, IUIManager
         GameObject.Find("CardsSet").GetComponent<HandsPosition>().HandsUIUpdate();
     }
 
+    public void ShowCardPlayed(int cardID)
+    {
+        // NOTE: Could use cardID to figure out what type of card it is and play
+        //       a different animation
+
+        if(CardDatabase.Instance.GetCardByID(cardID).cardClasses.Contains(CardClass.DAMAGE))
+        {
+            Animator chefAnimator = ChefGroup.GetComponent<Animator>();
+            if(chefAnimator != null)
+            {
+                chefAnimator.Play(Constants.CHEF_ATTACK_ANIMATION);
+            }
+        }
+    }
+
     public void PutCardInDeck(int cardID)
     {
         numCardsInDeck++;

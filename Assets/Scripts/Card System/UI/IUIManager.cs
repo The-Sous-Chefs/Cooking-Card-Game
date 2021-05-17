@@ -34,6 +34,8 @@ public interface IUIManager
 
     void RemoveCardFromHand(int cardID);
 
+    void ShowCardPlayed(int cardID);
+
     void PutCardInDeck(int cardID);
 
     void RemoveCardFromDeck(int cardID);
