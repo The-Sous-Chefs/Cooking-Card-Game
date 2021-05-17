@@ -38,6 +38,9 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     [SerializeField] private StunnedMessage stunnedMessage;
 
+    [SerializeField] private TurnMessage playerTurnMessage;
+    [SerializeField] private TurnMessage enemyTurnMessage;
+
     [SerializeField] private Image stunIndicatorImage;
 
     [SerializeField] private GameObject winMessage;
@@ -105,9 +108,16 @@ public class BoardManager : MonoBehaviour, IUIManager
 
     public void EndPlayerTurn()
     {
+        DisableInteraction();
+        // the end of this animation will fire an event to start the enemies'
+        // turn
+        enemyTurnMessage.PlayAnimation();
+    }
+
+    public void HandleEndOfPlayerTurn()
+    {
         if(battleManager != null)
         {
-            DisableInteraction();
             battleManager.HandleEndOfPlayerTurn();
         }
     }
@@ -117,7 +127,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         battleManager.RunNextEnemyTurn();
     }
 
-    private void EnableInteraction()
+    public void EnableInteraction()
     {
         // enable cards in hand
         foreach(CardUI cardUI in hand)
@@ -139,7 +149,7 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
-    private void DisableInteraction()
+    public void DisableInteraction()
     {
         // disable cards in hand
         foreach(CardUI cardUI in hand)
@@ -212,9 +222,13 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
         else
         {
-            // enable all interactions
-            EnableInteraction();
             UpdatePlayerStunStatus(isPlayerStunned);
+            // the end of this animation will fire an event to enable all
+            // interactions
+            if(playerTurnMessage != null)
+            {
+                playerTurnMessage.PlayAnimation();
+            }
         }
     }
 

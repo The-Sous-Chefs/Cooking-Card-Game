@@ -39,7 +39,8 @@ public static class Constants
     public static string DCCS_CARD_HOLDER_NAME = "CardHolder";
     public static string DCCS_COUNT_NAME = "Count";
     public static string ATTACK_ANIMATION = "attack animation";
-    public static string STUN_MESSAGE_ANIMATION = "Stun Message";
     public static string CHEF_ATTACK_ANIMATION = "Chef Attack Animation";
+    public static string STUN_MESSAGE_ANIMATION = "Stun Message";
+    public static string TURN_MESSAGE_ANIMATION = "Play Message";
     public static int NO_TARGET = -1;
 }
