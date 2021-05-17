@@ -94,6 +94,14 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
+    public void PlayCardByID(int cardId, int targetEnemyID)
+    {
+        if(battleManager != null)
+        {
+            battleManager.PlayCard(cardId, targetEnemyID);
+        }
+    }
+
     // NOTE: This method should only be passed the ID of the basic abilities,
     //       because if it gets any other CardID, it will just result in that
     //       card having its effects resolved.
@@ -171,12 +179,24 @@ public class BoardManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void RestartBattle()
+    public void EndBattle()
     {
         SceneManager.SetActiveScene(SceneManager.GetSceneByName("TScene"));
         SceneManager.UnloadSceneAsync("BattleScene");
         //SceneManager.LoadScene("TScene");
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void RestartGame()
+    {
+        int health = PlayerStats.Instance.GetHealth();
+        int maxHealth = PlayerStats.Instance.GetMaxHealth();
+        int globalMana = PlayerStats.Instance.GetGlobalMana();
+        int maxGlobalMana = PlayerStats.Instance.GetMaxGlobalMana();
+        PlayerStats.Instance.ApplyHealing(maxHealth - health);
+        PlayerStats.Instance.AddGlobalMana(maxGlobalMana - globalMana);
+        SceneManager.UnloadScene("TScene");
+        SceneManager.LoadScene("TScene");
     }
 
     //-------------------
@@ -456,13 +476,5 @@ public class BoardManager : MonoBehaviour, IUIManager
     public void LoseGame()
     {
         loseMessage.SetActive(true);
-    }
-
-    public void PlayCardByID(int cardId, int targetEnemyID)
-    {
-        if(battleManager != null)
-        {
-            battleManager.PlayCard(cardId, targetEnemyID);
-        }
     }
 }
