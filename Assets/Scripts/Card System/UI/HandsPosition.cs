@@ -7,17 +7,19 @@ public class HandsPosition : MonoBehaviour
 {
     public GameObject CardsSet;
     private int currentNumberOfCard;
-
+    private Vector2 ogsize= new Vector2(142,187);
     // Update is called once per frame
 
 
     public void HandsUIUpdate()
     {
         currentNumberOfCard = CardsSet.transform.childCount;
-        int xPos = 270 - (25 * currentNumberOfCard);
+        int xPos = 260 - (27 * currentNumberOfCard);
         CardsSet.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, -50);
-        int spacing = -50 - (3 * currentNumberOfCard);
-        CardsSet.GetComponent<GridLayoutGroup>().spacing = new Vector2(spacing, 1);
+        //int spacing = -60 - (1 * currentNumberOfCard);
+
+        CardsSet.GetComponent<GridLayoutGroup>().cellSize = new Vector2(ogsize.x - 1f * currentNumberOfCard, ogsize.y);
+        //CardsSet.GetComponent<GridLayoutGroup>().spacing = new Vector2(spacing, 0);
         GameObject.Find("placeHolder").transform.SetAsLastSibling();
     }
 }
