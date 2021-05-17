@@ -104,23 +104,13 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         if(battleManager != null)
         {
-            foreach(int enemyID in enemies.Keys)
-            {
-                Animator animator = enemies[enemyID].gameObject.GetComponent<Animator>();
-                if (animator != null)
-                {
-                    Debug.Log("animating");
-                    animator.SetTrigger("attack");
-                }
-            }
-
             battleManager.HandleEndOfPlayerTurn();
-
-            // if (animator != null)
-            // {
-            //    // animator.ResetTrigger("attack");
-            // }
         }
+    }
+
+    public void HandleEnemyTurnAnimationEnded()
+    {
+        battleManager.RunNextEnemyTurn();
     }
 
     public void RestartBattle()
@@ -341,6 +331,25 @@ public class BoardManager : MonoBehaviour, IUIManager
     {
         Debug.Assert(enemies.ContainsKey(monsterID));
         enemies[monsterID].ToggleStunned(stunned);
+    }
+
+    /*
+     * This method must somehow cause the backend to call RunNextEnemyTurn().
+     * The backend will call this method to play the animation for the enemy's
+     * turn (if there is one), then when the animation is over, it's relying on
+     * something calling RunNextEnemyTurn() to actually update the state of the
+     * game based on that enemy's action and start the next enemy turn if there
+     * is one or start the player's next turn.
+     *
+     * This implementation causes the enemy to play its attack animation, which
+     * has an animation event to call NotifyBoardManagerAnimationEndeD(), which
+     * will call this class's HandleEnemyTurnAnimationEnded() method, which will
+     * in turn call RunNextEnemyTurn on the battleManager.
+     */
+    public void PlayEnemyTurnAnimation(int monsterID, MonsterAction action)
+    {
+        Debug.Assert(enemies.ContainsKey(monsterID));
+        enemies[monsterID].PlayAttackAnimation();
     }
 
     public void WinGame()

@@ -54,6 +54,16 @@ public interface IUIManager
 
     void UpdateEnemyStunStatus(int monsterID, bool stunned);
 
+    /*
+     * This method must somehow cause the backend to call RunNextEnemyTurn().
+     * The backend will call this method to play the animation for the enemy's
+     * turn (if there is one), then when the animation is over, it's relying on
+     * something calling RunNextEnemyTurn() to actually update the state of the
+     * game based on that enemy's action and start the next enemy turn if there
+     * is one or start the player's next turn.
+     */
+    void PlayEnemyTurnAnimation(int monsterID, MonsterAction action);
+
     void WinGame();
 
     void LoseGame();

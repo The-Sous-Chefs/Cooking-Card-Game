@@ -42,6 +42,7 @@ public class BattleManager : MonoBehaviour
     private float blockPercent;
     private int stunnedTurns;
     [SerializeField] private Dictionary<int, Monster> monsters;
+    [SerializeField] private Queue<int> monsterTurnOrder;
     [SerializeField] private GameObject boardManagerObject;
     private IUIManager boardManager;
 
@@ -123,6 +124,7 @@ public class BattleManager : MonoBehaviour
         {
             boardManager.AddEnemy(monsterID, monsters[monsterID]);
         }
+        monsterTurnOrder = new Queue<int>();
 
         // NOTE: If we want the player to draw a card on the first turn or just
         //       have the start of the first turn treated like any other turn,
@@ -496,6 +498,9 @@ public class BattleManager : MonoBehaviour
     }
 
     // NOTE: This method used to be public and called directly by a button
+    // WHEN ADDING TURNING OFF INTERACTIONS DURING THE ENEMY TURN, THIS WILL NEED
+    // TO CHANGE TO RE-ENABLE ALL INTERACTIONS, THEN DISABLE ABILITIES AND RE-ENABLE
+    // THEM IF THE PLAYER CAN USE THEM!
     private void StartPlayerTurn()
     {
         // NOTE: update any player status first, since DCCS may affect it and we
@@ -568,7 +573,7 @@ public class BattleManager : MonoBehaviour
         DrawCard();
     }
 
-    private void EndPlayerTurn()
+    public void EndPlayerTurn()
     {
         // if the player was stunned this turn, decrement the counter; doing
         // this here, since it might be confusing to see the number to go to 0
@@ -583,56 +588,66 @@ public class BattleManager : MonoBehaviour
     public void HandleEndOfPlayerTurn()
     {
         EndPlayerTurn();
-        DoEnemyTurn();
-        StartPlayerTurn();
+        monsterTurnOrder = new Queue<int>(monsters.Keys);
+        TryStartNextEnemyTurn();
     }
 
-    // NOTE: This method used to be public and called directly by a button
-    private void DoEnemyTurn()
+    private void TryStartNextEnemyTurn()
     {
-        // it is possible that reflected damage could defeat monsters and
-        // removing them from monsters while iterating across its keys could
-        // cause issues, so this List will remove them after the loop
-        List<int> monsterIDsToRemove = new List<int>();
-        foreach(int monsterID in monsters.Keys)
+        try
         {
-            Monster currentMonster = monsters[monsterID];
-            Debug.Log("Monster " + currentMonster.name + "'s turn.");
-            MonsterAction monsterAction = currentMonster.GetTurnAction();
-            Debug.Log("Action is " + monsterAction);
-            switch(monsterAction)
-            {
-                case MonsterAction.REST:
-                    break;
-                case MonsterAction.ATTACK:
-                    bool enemyDefeated = HandleEnemyAttack(monsterID);
-                    if(enemyDefeated)
-                    {
-                        monsterIDsToRemove.Add(monsterID);
-                    }
-                    break;
-                case MonsterAction.SKILL:
-                    HandleEnemySpecialSkill(monsterID);
-                    break;
-                default:
-                    Debug.Log("Invalid behavior in monster: " + currentMonster.name);
-                    break;
-            }
+            int nextMonsterID = monsterTurnOrder.Peek();
+            Monster nextMonster = monsters[nextMonsterID];
+            boardManager.PlayEnemyTurnAnimation(
+                    nextMonsterID,
+                    nextMonster.GetTurnAction()
+            );
+        }
+        catch(InvalidOperationException exception)
+        {
+            StartPlayerTurn();
+        }
+    }
 
-            // reset any debuffs on the current enemy at the end of their turn
-            // (currently, just the stunning effect)
-            currentMonster.ClearEffects();
-            boardManager.UpdateEnemyStunStatus(monsterID, false);
-        }
-        foreach(int monsterID in monsterIDsToRemove)
+    public void RunNextEnemyTurn()
+    {
+        Debug.Assert(monsterTurnOrder.Count > 0);
+        int monsterID = monsterTurnOrder.Dequeue();
+        Debug.Assert(monsters.ContainsKey(monsterID));
+        Monster currentMonster = monsters[monsterID];
+        Debug.Log("Monster " + currentMonster.name + "'s turn.");
+        MonsterAction monsterAction = currentMonster.GetTurnAction();
+        currentMonster.GoToNextTurnAction();
+        Debug.Log("Action is " + monsterAction);
+        switch(monsterAction)
         {
-            monsters.Remove(monsterID);
-            boardManager.RemoveEnemy(monsterID);
+            case MonsterAction.REST:
+                break;
+            case MonsterAction.ATTACK:
+                bool enemyDefeated = HandleEnemyAttack(monsterID);
+                if(enemyDefeated)
+                {
+                    monsters.Remove(monsterID);
+                    boardManager.RemoveEnemy(monsterID);
+                    if(CheckIfAllEnemiesDefeated())
+                    {
+                        boardManager.WinGame();
+                    }
+                }
+                break;
+            case MonsterAction.SKILL:
+                HandleEnemySpecialSkill(monsterID);
+                break;
+            default:
+                Debug.Log("Invalid behavior in monster: " + currentMonster.name);
+                break;
         }
-        if(CheckIfAllEnemiesDefeated())
-        {
-            boardManager.WinGame();
-        }
+
+        // reset any debuffs on the current enemy at the end of their turn
+        // (currently, just the stunning effect)
+        currentMonster.ClearEffects();
+        boardManager.UpdateEnemyStunStatus(monsterID, false);
+        TryStartNextEnemyTurn();
     }
 
     private bool HandleEnemyAttack(int monsterID)
@@ -696,7 +711,8 @@ public class BattleManager : MonoBehaviour
                 return false;
             }
         }
-        // only return true if all enemies have <= 0 health
+        // only return true if all enemies have <= 0 health or if none are in
+        // the dictionary
         return true;
     }
 }

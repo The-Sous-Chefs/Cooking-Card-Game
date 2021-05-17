@@ -126,11 +126,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5eab385953e29b439223695584d09fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boardManageGameObject: {fileID: 0}
   nameText: {fileID: 6103286010250950602}
   hpText: {fileID: 0}
   healthBar: {fileID: 5107924383713781679}
   enemyImage: {fileID: 5092142720461753931}
-  boardManageGameObject: {fileID: 0}
+  animator: {fileID: 1531363909428802253}
 --- !u!95 &1531363909428802253
 Animator:
   serializedVersion: 3

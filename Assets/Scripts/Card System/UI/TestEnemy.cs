@@ -7,11 +7,12 @@ using UnityEngine.UI;
 
 public class TestEnemy : MonoBehaviour, IDropHandler
 {
+    [SerializeField] private GameObject boardManageGameObject;
     [SerializeField] private Text nameText;
     [SerializeField] private Text hpText;
     [SerializeField] private HealthBar healthBar;
     [SerializeField] private Image enemyImage;
-    [SerializeField] private GameObject boardManageGameObject;
+    [SerializeField] private Animator animator;
     private int id;
 
     void Awake()
@@ -50,6 +51,26 @@ public class TestEnemy : MonoBehaviour, IDropHandler
         else
         {
             enemyImage.color = Color.white;
+        }
+    }
+
+    public void PlayAttackAnimation()
+    {
+        if(animator != null)
+        {
+            animator.Play(Constants.ATTACK_ANIMATION);
+        }
+    }
+
+    public void NotifyBoardManagerAnimationEnded()
+    {
+        if(boardManageGameObject != null)
+        {
+            BoardManager boardManager = boardManageGameObject.GetComponent<BoardManager>();
+            if(boardManager != null)
+            {
+                boardManager.HandleEnemyTurnAnimationEnded();
+            }
         }
     }
 

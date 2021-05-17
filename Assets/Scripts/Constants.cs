@@ -38,5 +38,6 @@ public static class Constants
     // UI-related constants
     public static string DCCS_CARD_HOLDER_NAME = "CardHolder";
     public static string DCCS_COUNT_NAME = "Count";
+    public static string ATTACK_ANIMATION = "attack animation";
     public static int NO_TARGET = -1;
 }

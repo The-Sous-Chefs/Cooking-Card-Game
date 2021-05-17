@@ -366,7 +366,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 11
+    m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -377,8 +377,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: For this turn, increase the value in description of all cards by x (This
-    card can also be amplfied if you have multiple copies)
+  m_Text: This seems like it's the maximum amount of text that we can fit on a card.
+    It's a lot!
 --- !u!1 &5111633849057885849
 GameObject:
   m_ObjectHideFlags: 0
